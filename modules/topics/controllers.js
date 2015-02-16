@@ -69,7 +69,8 @@ function($http) {
 })
 
 .controller('topicEditCtrl', function($scope, $routeParams, $location, TopicServices, AuthenticationService) {
-    var topicID = ($routeParams.topicID) ? parseInt($routeParams.topicID) : 0;
+    //var topicID = ($routeParams.topicID) ? parseInt($routeParams.topicID) : 0;
+        var topicID = $routeParams.topicID;
 
     TopicServices.getTopic(topicID).then(function(data) {
         $scope.topic = data.data;

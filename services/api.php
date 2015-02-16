@@ -19,6 +19,8 @@ class API extends REST {
 	public function __construct() {
 		parent::__construct();
 		// Init parent contructor
+
+		date_default_timezone_set('Europe/Zurich');
 		$this -> dbConnect();
 		// Initiate Database connection
 	}
@@ -112,7 +114,7 @@ class API extends REST {
             $userID = $jwtToken->userID;
             error_log("UserID: " . $userID);
         } catch (Exception $e) {
-            error_log( 'Caught exception: ',  $e->getMessage(), "\n");
+            error_log( 'Caught exception: '.  $e->getMessage() . "\n");
         }
 
         return $userID;
@@ -120,17 +122,115 @@ class API extends REST {
 
 
     private function initMongo() {
+        $out = "Test\n";
+
+        $mongoUsers = $this->mongoDB->users;
+        $mongoUsers->drop();
+        $users = [];
+        $userT = [];
+        $query = "SELECT * FROM users";
+        $r = $this -> mysqli -> query($query) or die($this -> mysqli -> error . __LINE__);
+  		if ($r -> num_rows > 0) {
+	        while ($user = $r -> fetch_assoc()) {
+	            $uid = $user['userID'];
+	            //unset($user['userID']);
+	            $mongoID = new MongoID();
+	            $mID = $mongoID->{'$id'};
+	            $user['userID'] = $mID;
+	            $user['_id'] = $mID;
+                $mongoUsers->insert($user);
+                $userT[ $uid ] = $user['_id'];
+
+   	            $users[] = $user;
+	        }
+	    }
+	    $out .= $this->json($users) . "\n";
+
+        $mongoTopics = $this->mongoDB->topics;
+        $mongoTopics->drop();
+        $topics = [];
+        $topicT = [];
+        $query = "SELECT * FROM topics";
+        $r = $this -> mysqli -> query($query) or die($this -> mysqli -> error . __LINE__);
+  		if ($r -> num_rows > 0) {
+	        while ($topic = $r -> fetch_assoc()) {
+	            $tid = $topic['topicID'];
+
+	            //unset($topic['topicID']);
+	            $mongoID = new MongoID();
+	            $mID = $mongoID->{'$id'};
+	            $topic['topicID'] = $mID;
+	            $topic['_id'] = $mID;
+
+	            $topic['userID'] = $userT[ $topic['userID'] ];
+
+                $mongoTopics->insert($topic);
+                $topiT[ $tid ] = $topic['_id'];
+                $topics[] = $topic;
+	        }
+	    }
+	    $out .= "\n";
+	    $out .= $this->json($topics) . "\n";
+
+        $linkFormats = [];
+        $query = "SELECT * FROM linkFormats";
+        $r = $this -> mysqli -> query($query) or die($this -> mysqli -> error . __LINE__);
+        if ($r -> num_rows > 0) {
+            while ($linkFormat = $r -> fetch_assoc()) {
+                $linkFormats[] = $linkFormat;
+            }
+        }
+        $out .= "\n";
+        $out .= $this->json($linkFormats) . "\n";
+
+
         $mongoLinks = $this->mongoDB->links;
         $mongoLinks->drop();
+        $query = "SELECT c.linkID, c.linkName, c.linkURL, c.dateAdded, c.datePublish, c.topicID, c.formatID, t.topicName, l.formatName, c.tagsJSON, c.readStatus, c.userID, c.userPriv, u.userID, u.userName";
+        $query .= " FROM links c INNER JOIN topics t ON c.topicID = t.topicID INNER JOIN linkFormats l ON c.formatID = l.linkFormatID INNER JOIN users u ON u.userID = t.userID ";
+        $query .= "  ORDER BY c.linkID DESC";
+  	    $r = $this -> mysqli -> query($query) or die($this -> mysqli -> error . __LINE__);
+  	    $links = [];
+  		if ($r -> num_rows > 0) {
+	        while ($link = $r -> fetch_assoc()) {
+				// User
+                $link['userID'] = $userT[ $link['userID'] ];
+				$link['user'] = [
+				    'userName' => $link['userName'],
+				    'userID' => $link['userID'],
+				];
+				unset($link['userName']);
+				unset($link['userID']);
 
-        $post = array(
-                'title'     => 'What is MongoDB',
-                'content'   => 'MongoDB is a document database that provides high performance...',
-                'saved_at'  => new MongoDate()
-            );
+				// Topic
+                $link['topicID'] = $topiT[ $link['topicID'] ];
+				$link['topic'] = [
+				    'topicName' => $link['topicName'],
+				    'topicID' => $link['topicID'],
+                    'topicPermissions' => $link['userPriv'],
+				];
+				unset($link['topicName']);
+				unset($link['topicID']);
+				unset($link['userPriv']);
 
-        $mongoLinks->insert($post);
+				// Format
+				$link['format'] = $link['formatName'];
+				unset($link['formatName']);
+				unset($link['formatID']);
 
+	            $mongoID = new MongoID();
+	            $mID = $mongoID->{'$id'};
+	            $link['linkID'] = $mID;
+	            $link['_id'] = $mID;
+
+                $links[] = $link;
+                $mongoLinks->insert($link);
+			}
+  		}
+        $out .= "\n";
+  		$out .= $this->json($links) . "\n";
+
+	    $this -> response($out, 200);
     }
 
 	/***
@@ -147,80 +247,37 @@ class API extends REST {
 
 		$userID = NULL;
         if (isset($this->_request['userID'])) {
-            $userID = (int)$this -> _request['userID'];
+            $userID = $this -> _request['userID'];
         }
 
         $topicID = NULL;
         if (isset($this->_request['topicID'])) {
-            $topicID = (int)$this -> _request['topicID'];
+            $topicID = $this -> _request['topicID'];
         }
 
         $mongoLinks = $this->mongoDB->selectCollection('links');
+        $searchArr = array();
+        if (! is_null($topicID)) {
+            if (! is_null($userID)) {
+                $searchArr = array('userID' => $userID, 'topicID' => $topicID);
+            } else {
+                $searchArr = array('topicID' => $topicID);
+            }
+        } else {
+            if (! is_null($userID)) {
+                $searchArr = array('userID' => $userID);
+            } else {
 
-        $linksCursor = $mongoLinks->find();
+            }
+        }
+
+        $linksCursor = $mongoLinks->find($searchArr);
         $links = [];
         foreach($linksCursor as $link) {
             $links[] = $link;
         }
 
-        error_log($this->json($links));
 		$this->response($this->json($links), 200);
-
-/*
-		$userID = NULL;
-        if (isset($this->_request['userID'])) {
-            $userID = (int)$this -> _request['userID'];
-
-            if ($this->getTokenUserID() != $userID) {
-    		    $this -> response('', 301);
-            }
-        }
-
-        $topicID = NULL;
-        if (isset($this->_request['topicID'])) {
-            $topicID = (int)$this -> _request['topicID'];
-        }
-
-
-        $query = "";
-        if (! is_null($topicID)) {
-            if (! is_null($userID)) {
-                error_log("UserID: " + $userID);
-                $query = "SELECT distinct c.linkID, c.linkName, c.linkURL, c.dateAdded, c.datePublish, c.topicID, c.formatID, t.topicName, l.formatName, c.tagsJSON, c.userID, c.readStatus";
-                $query .= " FROM links c INNER JOIN topics t ON c.topicID = t.topicID INNER JOIN linkFormats l ON c.formatID = l.linkFormatID  WHERE c.userID = $userID AND c.topicID = $topicID ORDER BY c.linkID DESC";
-            } else {
-                error_log("No userID");
-                $query = "SELECT distinct c.linkID, c.linkName, c.linkURL, c.dateAdded, c.datePublish, c.topicID, c.formatID, t.topicName, l.formatName, c.tagsJSON, c.userID, c.readStatus";
-                $query .= " FROM links c INNER JOIN topics t ON c.topicID = t.topicID INNER JOIN linkFormats l ON c.formatID = l.linkFormatID AND c.topicID = $topicID ORDER BY c.linkID DESC";
-            }
-        } else {
-            if (! is_null($userID)) {
-                error_log("UserID: " + $userID);
-                $query = "SELECT distinct c.linkID, c.linkName, c.linkURL, c.dateAdded, c.datePublish, c.topicID, c.formatID, t.topicName, l.formatName, c.tagsJSON, c.userID, c.readStatus";
-                $query .= " FROM links c INNER JOIN topics t ON c.topicID = t.topicID INNER JOIN linkFormats l ON c.formatID = l.linkFormatID  WHERE c.userID = $userID ORDER BY c.linkID DESC";
-            } else {
-                error_log("No userID");
-                $query = "SELECT distinct c.linkID, c.linkName, c.linkURL, c.dateAdded, c.datePublish, c.topicID, c.formatID, t.topicName, l.formatName, c.tagsJSON, c.userID, c.readStatus";
-                $query .= " FROM links c INNER JOIN topics t ON c.topicID = t.topicID INNER JOIN linkFormats l ON c.formatID = l.linkFormatID ORDER BY c.linkID DESC";
-            }
-        }
-
-		error_log($query);
-		$r = $this -> mysqli -> query($query) or die($this -> mysqli -> error . __LINE__);
-
-		if ($r -> num_rows > 0) {
-			$result = array();
-			while ($row = $r -> fetch_assoc()) {
-				$result[] = $row;
-			}
-
-
-			$this -> response($this->json($result), 200);
-			// send user details
-		} else {
-		    $this -> response('', 204);
-		    // If no records "No Content" status
-		}*/
 	}
 
 
@@ -232,7 +289,6 @@ class API extends REST {
     		$userID = NULL;
             $userID = $this->getTokenUSerID();
 
-
             $linkURL = NULL;
             if (isset($this->_request['linkURL'])) {
                 $linkURL = $this->_request['linkURL'];
@@ -241,28 +297,16 @@ class API extends REST {
     		    $this -> response('', 204);
             }
 
+        $mongoLinks = $this->mongoDB->selectCollection('links');
+        $searchArr = array('linkURL' => $linkURL);
+        $link = $mongoLinks->findOne($searchArr);
+        if ($link) {
+  			$this -> response($this->json($link), 200);
+        } else {
+  		    $this -> response('', 204);
 
-            $query = "";
-            $query = "SELECT distinct c.linkID, c.linkName, c.linkURL, c.dateAdded, c.datePublish, c.topicID, c.formatID, t.topicName, l.formatName, c.tagsJSON, c.userID, c.readStatus";
-            $query .= " FROM links c INNER JOIN topics t ON c.topicID = t.topicID INNER JOIN linkFormats l ON c.formatID = l.linkFormatID  WHERE c.linkURL = '$linkURL' ORDER BY c.linkID DESC";
-    		error_log($query);
-    		$r = $this -> mysqli -> query($query) or die($this -> mysqli -> error . __LINE__);
-
-    		if ($r -> num_rows > 0) {
-    			//$result = array();
-    			while ($row = $r -> fetch_assoc()) {
-    			//	$result[] = $row;
-    			    $result = $row;
-    			}
-
-
-    			$this -> response($this->json($result), 200);
-    			// send user details
-    		} else {
-    		    $this -> response('', 204);
-    		    // If no records "No Content" status
-    		}
-    	}
+        }
+   	}
 
 
 
@@ -284,58 +328,31 @@ class API extends REST {
 
         // UserID
         $userID = $this->getTokenUSerID();
+        $linkID = $this -> _request['id'];
 
-        // LinkID or error
-        if (is_numeric($this->_request['id'])) {
-            $id = (int)$this -> _request['id'];
+        $mongoLinks = $this->mongoDB->selectCollection('links');
+        $searchArr = array('linkID' => (string)$linkID);
+        $link = $mongoLinks->findOne($searchArr);
+
+        if ($link) {
+            $this->response($this->json($link), 200);
         } else {
-            $this->response('', 204);
-        }
-
-   		$query = "SELECT c.linkID, c.linkName, c.linkURL, c.dateAdded, c.datePublish, c.topicID, c.formatID, c.tagsJSON, c.userID, c.userPriv, c.readStatus ";
-        $query .= " FROM links c where (c.linkID=? and userPriv=0) OR (c.linkID=? and userID=?)";
-
-        $r = $this->mysqli->prepare($query);
-        $r->bind_param('iii',
-            $id,
-            $id,
-            $userID);
-
-		if (! $r->execute()) { // or die($this -> mysqli -> error . __LINE__);
-		    error_log("EXECUTE " . $this -> mysqli -> error);
-		}
-
-        $result = NULL;
-        $r->bind_result($linkID, $linkName, $linkURL, $dateAdded, $datePublish, $topicID, $formatID, $tagsJSON, $userID, $userPriv, $readStatus);
-        while ($r->fetch()) {
-            $result = array(
-                'linkID' => $linkID,
-                'linkName' => $linkName,
-                'linkURL' => $linkURL,
-                'dateAdded' => $dateAdded,
-                'datePublish' => $datePublish,
-                'topicID' => (string)$topicID,
-                'formatID' => strval($formatID),
-                'tagsJSON' => $tagsJSON,
-                'userID' => $userID,
-                'userPriv' => $userPriv,
-                'readStatus' => (string)$readStatus
-            );
-         }
-         if ($result['datePublish'] == '1970-01-01') {
-            unset($result['datePublish']);
-         }
-         //error_log($result['datePublish']);
-
-        if (! is_null($result)) {
-            $this -> response($this -> json($result), 200);
-		} else {
-    		//error_log("NO");
-    		// If no records "No Content" status
-	    	$this -> response('', 204);
+  	    	$this -> response('', 204);
         }
 	}
 
+
+    private function getUsernameFor($userID) {
+        $mongoUsers = $this->mongoDB->selectCollection('users');
+        $user = $mongoUsers->findOne(array('userID' => $userID));
+        return $user['userName'];
+    }
+
+    private function getTopicnameFor($topicID) {
+        $mongoTopics = $this->mongoDB->selectCollection('topics');
+        $topic = $mongoTopics->findOne(array('topicID' => $topicID));
+        return $topic['topicName'];
+    }
 
 	/***
 	* Insert Link
@@ -349,35 +366,28 @@ class API extends REST {
 			$this -> response('', 406);
 		}
 
-        $userID = $this->getTokenUSerID();
-
+        $userID = $this->getTokenUserID();
       	$link = json_decode(file_get_contents("php://input"), true);
 
         $link['readStatusInitial'] = $link['readStatus'];
 
-		$query = 'INSERT INTO links (linkName, linkURL, dateAdded, datePublish, topicID, formatID, tagsJSON, userID, userPriv, readStatus)';
-		$query .= ' VALUES (?, ?, now(), ? , ?, ?, ?, ?, ?, ?)';
+        $mongoLinks = $this->mongoDB->selectCollection('links');
 
-		error_log("AAA: " . $link['datePublish']);
+        $mongoID = new MongoID();
+        $mID = $mongoID->{'$id'};
+        $link['linkID'] = $mID;
+        $link['_id'] = $mID;
+        $link['dateAdded'] = date ("Y-m-d H:i:s");
 
-        $r = $this->mysqli->prepare($query);
-        $r->bind_param('sssiisiii',
-            $link['linkName'],
-            $link['linkURL'],
-            $link['datePublish'],
-            $link['topicID'],
-            $link['formatID'],
-            $link['tagsJSON'],
-            $userID,
-            $link['userPriv'],
-            $link['readStatus']);
+        // Resolve: userName
+        $link['user']['userName'] = $this->getUsernameFor( $link['user']['userID']);
 
-        $ret = $r->execute();
+        // Resolve: topicName
+        $link['topic']['topicName'] = $this->getTopicnameFor( $link['topic']['topicID']);
 
-        $r->close();
-        $this->mysqli->close();
+        $mongoLinks->insert($link);
 
-        if (! $ret) {
+        if (false) {
             error_log("NOPE");
 			$this -> response('', 204);
         } else {
@@ -388,10 +398,20 @@ class API extends REST {
 
 
     private function canWriteLink($userID, $linkID) {
-        $query = 'SELECT t.userID, t.userPriv FROM links c INNER JOIN topics t ON c.topicID = t.topicID WHERE c.linkID = ?';
+        $mongoLinks = $this->mongoDB->selectCollection('links');
+        $searchArr = array('linkID' => $linkID);
+        $link = $mongoLinks->findOne($searchArr);
+
+        if ($link && $link['userID'] == $userID) {
+            return true;
+        } else {
+            return false;
+        }
+
+
+/*        $query = 'SELECT t.userID, t.userPriv FROM links c INNER JOIN topics t ON c.topicID = t.topicID WHERE c.linkID = ?';
         $r = $this->mysqli->prepare($query);
         $r->bind_param('i', $linkID);
-
 
         $ret = $r->execute();
 
@@ -399,10 +419,21 @@ class API extends REST {
             return false;
         } else {
    			return true;
-        }
+        }*/
     }
 
     private function canWriteTopic($userID, $topicID) {
+        $mongoLinks = $this->mongoDB->selectCollection('topics');
+        $searchArr = array('topicID' => $topicID);
+        $topic = $mongoLinks->findOne($searchArr);
+
+        if ($topic && $link['userID'] == $userID) {
+            return true;
+        } else {
+            return false;
+        }
+    /*
+
         $query = 'SELECT t.userID, t.userPriv FROM topics t WHERE (t.topicID = ? AND t.userID = ?) or (t.topicID = ? AND t.userPriv = 0)';
         $r = $this->mysqli->prepare($query);
         $r->bind_param('iii', $topicID, $userID, $topicID);
@@ -413,7 +444,7 @@ class API extends REST {
             return false;
         } else {
    			return true;
-        }
+        }*/
     }
 
 	/***
@@ -436,13 +467,29 @@ class API extends REST {
 
 		$link2 = json_decode(file_get_contents("php://input"), true);
 		$link = $link2['link'];
-		$id = (int)$link2['id'];
+		$id = $link['linkID'];
 
-		if (! $this->canWriteLink($userID, $id)) {
+/*		if (! $this->canWriteLink($userID, $id)) {
 			$this -> response('', 401);
             return;
 		}
+*/
+        $mongoLinks = $this->mongoDB->selectCollection('links');
+        $searchArr = array('linkID' => $link['linkID'], $link);
+        unset($link['_id']);
+        unset($link['linkID']);
+        $mongoLinks->update($link);
 
+        if (false) {
+            error_log("NOPE");
+			$this -> response('', 204);
+        } else {
+   			$success = array('status' => "Success", "msg" => "Link Created Successfully.", "data" => $link);
+   			$this -> response($this -> json($success), 200);
+        }
+
+
+/*
         $query = 'UPDATE links SET linkName=?, linkURL=?, datePublish=?, topicID=?, formatID=?, tagsJSON=?, readStatus=?';
         $query .= ' WHERE linkID=?';
 
@@ -473,7 +520,7 @@ class API extends REST {
 			    "data" => $link2
 			);
    		    $this -> response($this -> json($success), 200);
-        }
+        }*/
 	}
 
 
@@ -487,7 +534,7 @@ class API extends REST {
             return;
         }
 
-		$id = (int)$this -> _request['id'];
+		$id = $this -> _request['id'];
 
         if (! $this->canWriteLink($userID, $id)) {
             $this -> response('', 401);
@@ -509,19 +556,17 @@ class API extends REST {
 		if ($this -> get_request_method() != "GET") {
 			$this -> response('', 406);
 		}
-		$query = "SELECT distinct t.topicID, t.topicName, t.description FROM topics t ORDER BY topicName ASC";
-		$r = $this -> mysqli -> query($query) or die($this -> mysqli -> error . __LINE__);
 
-		if ($r -> num_rows > 0) {
-			$result = array();
-			while ($row = $r -> fetch_assoc()) {
-				$result[] = $row;
-			}
-			$this -> response($this -> json($result), 200);
-			// send user details
-		}
-		$this -> response('', 204);
-		// If no records "No Content" status
+        $mongoTopics = $this->mongoDB->selectCollection('topics');
+
+        $searchArr = array();
+        $topicsCursor = $mongoTopics->find($searchArr);
+        $topics = [];
+        foreach($topicsCursor as $topic) {
+            ///$topic['topicID'] = $topic['_id']->{'$id'};
+            $topics[] = $topic;
+        }
+        $this->response($this->json($topics), 200);
 	}
 
 		private function topicsForUser() {
@@ -529,23 +574,17 @@ class API extends REST {
     			$this -> response('', 406);
     		}
 
-    		$userID = (int)$this -> _request['userID'];
+    		$userID = $this -> _request['userID'];
+            $mongoTopics = $this->mongoDB->selectCollection('topics');
 
-    		$query = "SELECT t.topicID, t.topicName, t.description FROM topics t WHERE t.userID = $userID  ORDER BY topicName ASC";
-    		error_log($query);
-    		$r = $this -> mysqli -> query($query) or die($this -> mysqli -> error . __LINE__);
-
-    		if ($r -> num_rows > 0) {
-    			$result = array();
-    			while ($row = $r -> fetch_assoc()) {
-    				$result[] = $row;
-    				//error_log($row);
-    			}
-    			$this -> response($this -> json($result), 200);
-    			// send user details
-    		}
-    		$this -> response('', 204);
-    		// If no records "No Content" status
+            $searchArr = array('userID' => $userID);
+            $topicsCursor = $mongoTopics->find($searchArr);
+            $topics = [];
+            foreach($topicsCursor as $topic) {
+                $topic['topicID'] = $topic['_id']->{'$id'};
+                $topics[] = $topic;
+            }
+            $this->response($this->json($topics), 200);
     	}
 
     private function topic() {
@@ -560,43 +599,16 @@ class API extends REST {
         // UserID
         $userID = $this->getTokenUSerID();
 
-        // TopicID or error
-        if (is_numeric($this->_request['id'])) {
-            $id = (int)$this -> _request['id'];
+        $topicID = new MongoId ($this->_request['id']);
+
+        $mongoTopics = $this->mongoDB->selectCollection('topics');
+        $searchArr = array('_id' => $topicID);
+        $topic = $mongoTopics->findOne($searchArr);
+        $topic['topicID'] = $topic['_id'].$id;
+
+        if ($topic) {
+            $this->response($this->json($topic), 200);
         } else {
-            $this->response('', 204);
-        }
-
-        $query = "SELECT t.topicID, t.topicName, t.description, t.userID, t.userPriv FROM topics t ";
-        $query .= " WHERE (t.topicID=1 and t.userPriv=?) OR (t.topicID=? and t.userID=?)";
-
-        $r = $this->mysqli->prepare($query);
-        $r->bind_param('iii',
-            $id,
-            $id,
-            $userID);
-
-        if (! $r->execute()) { // or die($this -> mysqli -> error . __LINE__);
-            error_log("EXECUTE " . $this -> mysqli -> error);
-        }
-
-        $result = NULL;
-        $r->bind_result($topicID, $topicName, $description, $userID, $userPriv);
-        while ($r->fetch()) {
-            $result = array(
-                'topicID' => $topicID,
-                'topicName' => $topicName,
-                'description' => $description,
-                'userID' => $userID,
-                'userPriv' => (string) $userPriv
-            );
-         }
-
-        if (! is_null($result)) {
-            $this -> response($this -> json($result), 200);
-        } else {
-            error_log("NO");
-            // If no records "No Content" status
             $this -> response('', 204);
         }
     }
@@ -613,7 +625,7 @@ class API extends REST {
 			$this -> response('', 406);
 		}
 
-        $userID = $this->getTokenUSerID();
+        $userID = $this->getTokenUserID();
         if (is_null($userID)) {
 			$this -> response('', 401);
             return;
@@ -621,7 +633,7 @@ class API extends REST {
 
 		$topic2 = json_decode(file_get_contents("php://input"), true);
 		$topic = $topic2['topic'];
-		$id = (int)$topic2['id'];
+		$id = $topic2['id'];
 
 		if (! $this->canWriteTopic($userID, $id)) {
 		    error_log("UserID: $userID   ID: $id");

@@ -76,7 +76,7 @@
 
                             <div class="col-md-3">
                                 <select name="link_topicid"
-                                        ng-model="link.topicID"
+                                        ng-model="link.topic.topicID"
                                         ng-options="topic.topicID as topic.topicName for topic in topics"
                                         required>
                                 </select>
@@ -125,7 +125,7 @@
                                         ng-disabled="isClean() || myForm.$invalid"
                                         class="btn btn-primary">{{buttonText}}</button>
                                 <button ng-click="deleteLink(link)"
-                                        ng-show="link._id" class="btn btn-warning">Delete</button>
+                                        ng-show="link.linkID" class="btn btn-warning">Delete</button>
                             </div>
                         </div>
                     </div>

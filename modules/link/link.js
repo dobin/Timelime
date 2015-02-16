@@ -229,7 +229,7 @@ angular.module('myApp.links', ['ngRoute'])
 
         $scope.deleteLink = function(link) {
             $location.path('/');
-            if (confirm("Are you sure to delete link number: " + $scope.link._id) == true)
+            if (confirm("Are you sure to delete link number: " + $scope.link.topicID) == true)
                 services.deleteLink(link.linkID);
         }
 
@@ -241,8 +241,9 @@ angular.module('myApp.links', ['ngRoute'])
             if (AuthenticationService.isLoggedin()) {
                 $location.path('/');
                 if (AuthenticationService.getCurrentUserID()) {
-                    link['userID'] = AuthenticationService.getCurrentUserID();
-                    link['userPriv'] = 0;
+                    link.user = {
+                        userID: AuthenticationService.getCurrentUserID(),
+                    }
 
                     services.insertLink(link);
                 }

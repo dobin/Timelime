@@ -33,7 +33,7 @@
                 <td class="col-md-2" style="text-align:right" data-title="'DateAdded'" sortable="'dateAdded'" filter="{ 'Date': 'text' }">
                     <span class="timelineTitleBig">{{link.dateAdded | date :'HH:mm dd.MM.yyyy'}} </span><br>
 
-                    {{link.topicName}}
+                    {{link.topic.topicName}}
 
                     <br>
                     <a ng-repeat="tag in link.tags">{{tag.text}}&nbsp;</a>

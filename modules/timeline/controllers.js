@@ -91,7 +91,7 @@ angular.module('myApp.timeline', ['ngRoute'])
             var filtered = [];
 
             angular.forEach(links, function(link) {
-                if(topicFilter == null || link.topicName === topicFilter.topicName) {
+                if(topicFilter == null || link.topic.topicName === topicFilter.topicName) {
                     if(readStatusFilter == null || link.readStatus === readStatusFilter.id) {
                         filtered.push(link);
                     }
