@@ -1,0 +1,141 @@
+﻿<style type="text/css">
+  .form-horizontal input.ng-invalid.ng-dirty {
+    border-color: #FA787E;
+  }
+
+  .form-horizontal input.ng-valid.ng-dirty {
+    border-color: #78FA89;
+  }
+</style>
+<div class="view">
+    <div class="container">
+        <div class="row">
+
+        <header>
+            <h3>{{title}}</h3>
+        </header>
+        <div class="col-md-12">
+
+        <form role="form" name="myForm" class="form-horizontal">
+        <div class="row">
+
+
+        <div class= "form-group" ng-class="{error: myForm.link_name.$invalid}">
+            <div class= "col-md-2"> Title </div>
+
+            <div class="col-md-10">
+                <input name="link_name" ng-model="link.linkName" type= "text" class= "form-control" placeholder="Enter title" required/>
+                <span ng-show="myForm.link_name.$dirty && myForm.link_name.$invalid" class="help-inline">Title Required</span>
+            </div>
+        </div>
+
+        <div class= "form-group" ng-class="{error: myForm.link_url.$invalid}">
+            <div class= "col-md-2"> URL </div>
+
+            <div class="col-md-8">
+                <input ng-blur="checkIfLinkExists(link)" name="link_url" ng-model="link.linkURL" type= "text" class= "form-control" placeholder="Enter link URL" required/>
+                <span ng-show="myForm.link_url.$dirty && myForm.link_url.$invalid" class="help-inline">URL Required</span>
+            </div>
+
+            <div class="col-md-2">
+                <select name="format_id"
+                        ng-model="link.formatID"
+                        ng-options="format.linkFormatID as format.formatName for format in formats"
+                        required>
+
+                </select>
+                <span ng-show="myForm.format_id.$dirty && myForm.format_id.$invalid" class="help-inline">Format Required</span>
+            </div>
+
+
+
+            <div class="col-md-2" ng-if="linkURLexists">
+                &nbsp
+            </div>
+            <div class="col-md-2" ng-if="linkURLexists">
+                &nbsp
+            </div>
+            <div class="col-md-8" ng-if="linkURLexists">
+                URL already exists: <a ng-href="#/edit-link/{{linkURLexists.linkID}}">ID {{linkURLexists.linkID}} in {{linkURLexists.topicName}}</a>
+            </div>
+
+
+
+        </div>
+
+        <div class= "form-group">
+            <div class= "col-md-2"> Date Publish </div>
+
+            <div class="col-md-3">
+                <input ng-model="link.datePublish" type= "date" class= "form-control" />
+                <span ng-show="myForm.link_datePublish.$dirty && myForm.link_datePublish.$invalid" class="help-inline">Publish Date Required</span>
+            </div>
+
+            <div class="col-md-7">
+                <button ng-click="setPublishToToday()">Today</button>
+            </div>
+        </div>
+
+        <div class= "form-group">
+            <div class= "col-md-2"> Topic </div>
+
+            <div class="col-md-3">
+                <select name="link_topicid"
+                        ng-model="link.topicID"
+                        ng-options="topic.topicID as topic.topicName for topic in topics"
+                        required>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <button ng-click="addNewTopic()">Add Topic</button>
+               <input ng-model="newTopic" placeholder="Create new topic" />
+
+            </div>
+
+            <div class="col-md-3">
+
+            </div>
+
+        </div>
+
+        <div class= "form-group">
+            <div class= "col-md-2"> Tags </div>
+
+            <div class="col-md-10">
+
+                <tags-input ng-model="link.tags">
+                    <!--  <auto-complete source="loadTags($query)"></auto-complete> -->
+                </tags-input>
+            </div>
+        </div>
+
+        <div class= "form-group">
+            <div class= "col-md-2"> Read </div>
+
+            <div class="col-md-10">
+                <select name="link_readstatus"
+                        ng-model="link.readStatus"
+                        ng-options="readStat.id as readStat.text for readStat in readStats",
+                        required>
+                </select>
+            </div>
+        </div>
+
+        <div class= "form-group">
+            <label class= "col-md-2"></label>
+            <div class="col-md-4">
+            <a ng-click="goBack()" class="btn">Cancel</a>
+                <button ng-click="saveLink(link);"
+                        ng-disabled="isClean() || myForm.$invalid"
+                        class="btn btn-primary">{{buttonText}}</button>
+                <button ng-click="deleteLink(link)"
+                        ng-show="link._id" class="btn btn-warning">Delete</button>
+            </div>
+        </div>
+        </div>
+        </form>
+        </div>
+        </div>
+    </div>
+</div>

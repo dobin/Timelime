@@ -1,0 +1,73 @@
+﻿<style type="text/css">
+  .form-horizontal input.ng-invalid.ng-dirty {
+    border-color: #FA787E;
+  }
+
+  .form-horizontal input.ng-valid.ng-dirty {
+    border-color: #78FA89;
+  }
+</style>
+<div class="view">
+    <div class="container">
+        <div class="row">
+
+        <header>
+            <h3>{{title}}</h3>
+        </header>
+        <div class="col-md-12">
+
+        <form role="form" name="myForm" class="form-horizontal">
+        <div class="row">
+
+
+        <div class= "form-group" ng-class="{error: myForm.topic_name.$invalid}">
+            <div class= "col-md-2"> Title </div>
+
+            <div class="col-md-10">
+                <input name="topic_name" ng-model="topic.topicName" type= "text" class= "form-control" placeholder="Enter title" required/>
+                <span ng-show="myForm.topic_name.$dirty && myForm.topic_name.$invalid" class="help-inline">Title Required</span>
+            </div>
+        </div>
+
+        <div class= "form-group" ng-class="{error: myForm.topic_url.$invalid}">
+            <div class= "col-md-2"> URL </div>
+
+            <div class="col-md-8">
+                <input name="topic_url" ng-model="topic.description" type= "text" class= "form-control" placeholder="Enter topic URL" required/>
+                <span ng-show="myForm.topic_url.$dirty && myForm.topic_url.$invalid" class="help-inline">URL Required</span>
+            </div>
+
+            <div class="col-md-2">
+            </div>
+        </div>
+
+
+            <div class= "form-group">
+                <div class= "col-md-2"> Permission </div>
+                <div class="col-md-10">
+                    <select name="topic_permission"
+                            ng-model="topic.userPriv"
+                            ng-options="permission.id as permission.text for permission in permissions",
+                            required>
+                    </select>
+                </div>
+            </div>
+
+
+        <div class= "form-group">
+            <label class= "col-md-2"></label>
+            <div class="col-md-4">
+            <a ng-click="goBack()" class="btn">Cancel</a>
+                <button ng-click="saveTopic(topic);"
+                        ng-disabled="isClean() || myForm.$invalid"
+                        class="btn btn-primary">Update Topic</button>
+                <button ng-click="deleteTopic(topic)"
+                        ng-show="topic.topicID" class="btn btn-warning">Delete</button>
+            </div>
+        </div>
+        </div>
+        </form>
+        </div>
+        </div>
+    </div>
+</div>

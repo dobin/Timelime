@@ -1,0 +1,37 @@
+ <div class="row">
+ 	
+    <div class="col-md-12" ng-show="topics.length > 0">
+    
+    <nav class= "navbar navbar-default" role= "navigation" >
+    <div class= "navbar-header" >
+    <a class="btn btn-lg btn-success" href="#/add-topic"><i class="glyphicon glyphicon-plus"></i>Add new Topic</a>
+    </div>
+    </nav>
+
+        <table class="table table-striped table-bordered">
+        <thead>
+        <th>Topic</th>
+        <th>Action</th>
+        </thead>
+        <tbody>
+            <tr ng-repeat="data in topics track by $index">
+                <td>
+                    <b>{{data.topicName}}</b>
+                <p>
+                    {{data.description}}
+                </p>
+                </td>
+                <td>
+                    <a href="#/edit-topic/{{data.topicID}}" class="btn"><i class="glyphicon glyphicon-edit"></i>Edit Topic</a>
+                    <a href="#/timeline/{{data.topicID}}" class="btn"><i class="glyphicon glyphicon-edit"></i>Topic Timeline</a>
+                </td>
+            </tr>
+        </tbody>
+        </table>
+    </div>
+    <div class="col-md-12" ng-show="topics.length == 0">
+        <div class="col-md-12">
+            <h4>No Topics found</h4>
+        </div>
+    </div>
+</div>

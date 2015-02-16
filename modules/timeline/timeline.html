@@ -1,0 +1,86 @@
+<style type="text/css">
+    body    {overflow-y:scroll;}
+</style>
+
+
+<div class="row">
+    <div class="col-md-12" ng-show="links.length > 0">
+
+        <nav class= "navbar navbar-default" role= "navigation" >
+            <div class= "navbar-header" >
+
+
+                <p class="navbar-text">
+                Topic:
+                <select ng-change="reloadTable()" name="topic_filter" ng-model="topicFilter" ng-options="topic.topicName for topic in topics">
+                    <option value=""></option>
+                </select>
+                </p>
+
+                <p class="navbar-text">
+                Readstatus:
+                <select ng-change="reloadTable()" name="readstatus_filter" ng-model="readStatusFilter" ng-options="readStat.text for readStat in readStats">
+                    <option value=""></option>
+                </select>
+
+                </p>
+            </div>
+        </nav>
+
+
+        <table ng-table="tableParams" show-filter="true" class="table timelinetable">
+            <tr ng-repeat="link in $data">
+                <td class="col-md-2" style="text-align:right" data-title="'DateAdded'" sortable="'dateAdded'" filter="{ 'Date': 'text' }">
+                    <span class="timelineTitleBig">{{link.dateAdded | date :'HH:mm dd.MM.yyyy'}} </span><br>
+
+                    {{link.topicName}}
+
+                    <br>
+                    <a ng-repeat="tag in link.tags">{{tag.text}}&nbsp;</a>
+
+
+                </td>
+
+                <td class="col-md-10"  data-title="'LinkName'" sortable="'linkName'" filter="{ 'linkName': 'text' }">
+                    <span class="timelineTitleBig"> {{link.linkName}} </span>
+                    <a ng-if="user.userID" class="pull-right" ng-href="#/edit-link/{{link.linkID}}">&#91;Edit&#93;</a>
+                    <a class="pull-right" href="" ng-click="viewLink(link);">&#91;Details&#93;</a>
+                    <a ng-if="user.userID" class="pull-right" ng-click="changeLinkReadStatus(link)">&#91;{{link.readStatusTextRo}}&#93;</a>
+
+
+                    <br>
+                    <span class="timelineDateSmall">
+                    <a ng-href="{{link.linkURL}}"> {{link.linkURL}}</a>
+                    </span>
+                    <br>
+
+
+                    <div ng-if="link.datePublish">
+                        Published: {{link.datePublish | date :'dd.MM.yyyy'}}
+                    </div>
+
+                    <br>
+
+                    <span ng-if="link.isSelected">
+                    <div class="custom">
+                        <div ng-include="'modules/timeline/view-timeline-link.html'"></div>
+                    </div>
+                    </span>
+
+                </td>
+            </tr>
+        </table>
+
+    </div>
+
+
+
+    <div class="col-md-12" ng-show="links.length == 0">
+        <div class="col-md-12">
+            <h4>No links found</h4>
+        </div>
+    </div>
+</div>
+
+
+

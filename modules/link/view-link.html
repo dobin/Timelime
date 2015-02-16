@@ -1,0 +1,64 @@
+
+<div class="view">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+
+                <form role="form" name="myForm" class="form-horizontal">
+                    <div class="row">
+
+
+                        <div class= "form-group" ng-class="{error: myForm.link_name.$invalid}">
+                            <div class= "col-md-2"> Title </div>
+
+                            <div class="col-md-6">
+                                {{link.linkName}}
+                            </div>
+                        </div>
+
+                        <div class= "form-group" ng-class="{error: myForm.link_url.$invalid}">
+                            <div class= "col-md-2"> URL </div>
+
+                            <div class="col-md-4">
+                                {{link.linkURL}}
+                            </div>
+
+                            <div class="col-md-2">
+                                {{link.formatID}}
+                            </div>
+                        </div>
+
+                        <div class= "form-group">
+                            <div class= "col-md-2"> Date Publish </div>
+
+                            <div class="col-md-6">
+                                {{link.datePublish}}
+                            </div>
+                        </div>
+
+                        <div class= "form-group">
+                            <div class= "col-md-2"> Topic </div>
+
+                            <div class="col-md-6">
+                                {{link.topicID}}
+                            </div>
+
+                        </div>
+
+                        <div class= "form-group">
+                            <div class= "col-md-2"> Tags </div>
+
+                            <div class="col-md-6">
+
+                                <tags-input ng-model="link.tags">
+                                    <!--  <auto-complete source="loadTags($query)"></auto-complete> -->
+                                </tags-input>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

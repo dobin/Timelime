@@ -1,0 +1,36 @@
+body{margin-top:60px}
+
+
+ul>li, a{cursor: pointer;}
+
+.ng-table tr.emphasis td {
+    background-color: #DDD;
+    font-weight: bold;
+}
+
+.timelinetable td:nth-child(even) {
+    border-bottom: 1px solid white;
+}
+.timelinetable td:nth-child(odd) {
+    border-bottom: 1px solid white;
+}
+
+.timelinetable th:nth-child(even) {
+    border-left: 1px solid black;
+}
+
+.timelinetable td:nth-child(even) {
+  border-left: 1px solid black;
+}
+
+.custom {
+    background-color: #DDD;
+}
+
+.timelineTitleBig {
+    font-size: 120%;
+}
+
+.timelineDateSmall {
+    font-size: 90%;
+}
