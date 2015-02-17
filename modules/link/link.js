@@ -99,10 +99,11 @@ angular.module('myApp.links', ['ngRoute'])
         var linkID = ($routeParams.linkID) ? parseInt($routeParams.linkID) : 0;
         $rootScope.title = 'View Link';
 
+
         $scope.readStats = ReadstatusService.getReadstats();
 
         $scope.topics = topics.data;
-        $scope.formats = formats.data;
+        $scope.formats = formats;
 
         $scope.link = link.data;
     })
@@ -114,14 +115,16 @@ angular.module('myApp.links', ['ngRoute'])
         $scope.buttonText = 'Update Link';
 
         $scope.topics = topics.data;
-        $scope.formats = formats.data;
+        $scope.formats = formats;
 
         $scope.readStats = ReadstatusService.getReadstats();
 
+
+        console.log(formats);
         var original = link.data;
-        original._id = linkID;
+        //original._id = linkID;
         $scope.link = angular.copy(original);
-        $scope.link._id = linkID;
+        //$scope.link._id = linkID;
 
         $scope.readStats = ReadstatusService.getReadstats();
 
@@ -140,7 +143,7 @@ angular.module('myApp.links', ['ngRoute'])
 
         $scope.deleteLink = function(link) {
             $location.path('/');
-            if (confirm("Are you sure to delete link number: " + $scope.link._id) == true)
+            if (confirm("Are you sure to delete link number: " + $scope.link.linkID) == true)
                 services.deleteLink(link.linkID);
         };
 
@@ -191,12 +194,14 @@ angular.module('myApp.links', ['ngRoute'])
         $scope.link = angular.copy(original);
 
         $scope.topics = topics.data;
-        $scope.formats = formats.data;
+        $scope.formats = formats;
 
         $scope.link.readStatus = '0';
         $scope.link.readStatusOrig = '0';
         $scope.link.formatID = '1';
-        $scope.link.userPriv = '0';
+        $scope.link.user = {
+            userPriv: '0'
+        };
 
         // for adding a link via bookmarklet
         if ($routeParams.url) {
@@ -241,9 +246,9 @@ angular.module('myApp.links', ['ngRoute'])
             if (AuthenticationService.isLoggedin()) {
                 $location.path('/');
                 if (AuthenticationService.getCurrentUserID()) {
-                    link.user = {
+                    /*link.user = {
                         userID: AuthenticationService.getCurrentUserID(),
-                    }
+                    }*/
 
                     services.insertLink(link);
                 }
@@ -291,9 +296,9 @@ angular.module('myApp.links', ['ngRoute'])
                 var readStats = ReadstatusService.getReadstatusTextFor(link.readStatus);
                 link.readStatusTextRo = readStats;
 
-                if (link.tagsJSON.length > 0) {
+                /*if (link.tagsJSON.length > 0) {
                     link.tags = angular.fromJson(link.tagsJSON);
-                }
+                }*/
 
                 link.dateAdded = new Date(link.dateAdded);
                 if (link.datePublish != null) {
@@ -384,7 +389,7 @@ angular.module('myApp.links', ['ngRoute'])
 
 
             obj.insertLink = function(link) {
-                link.tagsJSON = JSON.stringify(link.tags);
+                //link.tagsJSON = JSON.stringify(link.tags);
 
                 return $http.post(serviceBase + 'insertLink', link).then(function(results) {
                     return results;
@@ -392,9 +397,9 @@ angular.module('myApp.links', ['ngRoute'])
             };
 
             obj.updateLink = function(id, link) {
-                if ('tags' in link) {
+                /*if ('tags' in link) {
                     link.tagsJSON = JSON.stringify(link.tags);
-                }
+                }*/
 
                 return $http.post(serviceBase + 'updateLink', {
                     id : id,
@@ -413,7 +418,20 @@ angular.module('myApp.links', ['ngRoute'])
 
             // Formats
             obj.getFormats = function() {
-                return $http.get(serviceBase + 'formats');
+                var f = [{
+                    linkFormatID: '1',
+                    formatName: 'website',
+                    description: ''
+                },
+                {
+                    linkFormatID: '2',
+                    formatName: 'pdf',
+                    description: ''
+                }
+                ];
+
+                return f;
+                //return $http.get(serviceBase + 'formats');
             }
 
             return obj;

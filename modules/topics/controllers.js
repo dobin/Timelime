@@ -30,7 +30,6 @@ function($http) {
 	}
 
     obj.getTopicsForUser = function(userID) {
-        console.log("D");
         return $http.get(serviceBase + 'topicsForUser?userID=' + userID);
     }
 
