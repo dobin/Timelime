@@ -119,23 +119,13 @@ angular.module('myApp.links', ['ngRoute'])
 
         $scope.readStats = ReadstatusService.getReadstats();
 
-
-        console.log(formats);
         var original = link.data;
-        //original._id = linkID;
         $scope.link = angular.copy(original);
-        //$scope.link._id = linkID;
-
         $scope.readStats = ReadstatusService.getReadstats();
 
         $scope.goBack = function() {
             window.history.back();
         };
-        /*
-         $scope.loadTags = function(query) {
-         return [];
-         //return $http.get('/tags?query=' + query);
-         };*/
 
         $scope.isClean = function() {
             return angular.equals(original, $scope.link);
@@ -197,7 +187,7 @@ angular.module('myApp.links', ['ngRoute'])
         $scope.formats = formats;
 
         $scope.link.readStatus = '0';
-        $scope.link.readStatusOrig = '0';
+        $scope.link.readStatusInitial = '0';
         $scope.link.formatID = '1';
         $scope.link.user = {
             userPriv: '0'

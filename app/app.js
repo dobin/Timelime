@@ -16,7 +16,6 @@ var app = angular.module('myApp', [
 
 // declare modules - WHY
 angular.module('myApp.Authentication', []);
-angular.module('myApp.Home', []);
 
 app.run(['$location', '$rootScope', 'AuthenticationService', function($location, $rootScope, AuthenticationService) {
 	$rootScope.$on('$routeChangeSuccess', function(event, current, previous) {

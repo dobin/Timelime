@@ -16,7 +16,7 @@ angular.module('myApp.timeline', ['ngRoute'])
                 }
             }
         })
-        .when('/timeline/:userID', {
+        .when('/timeline/:topicID', {
             title : 'Timeline',
             templateUrl : 'modules/timeline/timeline.html',
             controller : 'timelineListCtrl',
@@ -26,8 +26,7 @@ angular.module('myApp.timeline', ['ngRoute'])
                     return services.getLinksForUser(userID);
                 },
                 topics: function(TopicServices, $route) {
-                    var userID = $route.current.params.userID;
-                    return TopicServices.getTopicsForUser(userID);
+                    return TopicServices.getTopic(topicID);
                 }
             }
         })
@@ -187,11 +186,13 @@ angular.module('myApp.timeline', ['ngRoute'])
         }
 
         $scope.changeLinkReadStatus = function(link) {
-            link.readStatus++;
-            link.readStatus = link.readStatus % 4;
+            var rs = parseInt(link.readStatus);
+            rs++;
+            rs = rs % 4;
+            link.readStatus = rs.toString();
 
             // Readstats
-            var readStats = ReadstatusService.getReadstatusTextFor(link.readStatus);
+            var readStats = ReadstatusService.getReadstatusTextFor(rs);
             link.readStatusTextRo = readStats;
 
             services.updateLink(link.linkID, link);

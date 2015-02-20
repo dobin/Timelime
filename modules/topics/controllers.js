@@ -2,7 +2,7 @@
 
 angular.module('myApp.topics', ['ngRoute'])
 .config(['$routeProvider', function($routeProvider) {
-    $routeProvider.when('/topics', {
+    $routeProvider.when('/mytopics', {
 		title : 'Topics',
 		templateUrl : 'modules/topics/topics.html',
 		controller : 'topicListCtrl'
@@ -18,8 +18,7 @@ angular.module('myApp.topics', ['ngRoute'])
 function($http) {
 	var serviceBase = 'services/'
 	var obj = {};
-	
-	
+
 	// Topics
 	obj.getTopics = function() {
 		return $http.get(serviceBase + 'topics');
@@ -57,19 +56,18 @@ function($http) {
 	
 	return obj;
 }])
-	
-.controller('topicListCtrl', function($scope, TopicServices) {
 
-	TopicServices.getTopics().then(function(data) {
+
+.controller('topicListCtrl', function($scope, TopicServices, AuthenticationService) {
+        console.log("A");
+	TopicServices.getTopicsForUser(AuthenticationService.getCurrentUserID()).then(function(data) {
 		$scope.topics = data.data;
 	});
-
-
 })
 
+
 .controller('topicEditCtrl', function($scope, $routeParams, $location, TopicServices, AuthenticationService) {
-    //var topicID = ($routeParams.topicID) ? parseInt($routeParams.topicID) : 0;
-        var topicID = $routeParams.topicID;
+    var topicID = $routeParams.topicID;
 
     TopicServices.getTopic(topicID).then(function(data) {
         $scope.topic = data.data;

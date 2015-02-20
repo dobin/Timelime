@@ -120,7 +120,7 @@ class API extends REST {
 
 
     private function initMongo() {
-        $out = "Test\n";
+        $out = "Init dä möngi\n";
 
         $mongoUsers = $this->mongoDB->users;
         $mongoUsers->drop();
@@ -268,9 +268,8 @@ class API extends REST {
 
             }
         }
-        error_log($this->json($searchArr));
-
         $linksCursor = $mongoLinks->find($searchArr);
+
         $links = [];
         foreach($linksCursor as $link) {
             $links[] = $link;
@@ -512,7 +511,7 @@ class API extends REST {
         $userID = $this -> _request['userID'];
         $mongoTopics = $this->mongoDB->selectCollection('topics');
 
-        $searchArr = array('user.userID' => $userID);
+        $searchArr = array('userID' => $userID);
         $topicsCursor = $mongoTopics->find($searchArr);
         $topics = [];
         foreach($topicsCursor as $topic) {
