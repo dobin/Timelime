@@ -616,6 +616,25 @@ class API extends REST {
         }
 	}
 
+
+
+		private function users() {
+    		if ($this -> get_request_method() != "GET") {
+    			$this -> response('', 406);
+    		}
+
+            $mongousers = $this->mongoDB->selectCollection('users');
+
+            $searchArr = array();
+            $usersCursor = $mongousers->find($searchArr);
+            $users = [];
+            foreach($usersCursor as $user) {
+                $users[] = $user;
+            }
+            $this->response($this->json($users), 200);
+    	}
+
+
 	/*
 	 *	Encode array into JSON
 	 */

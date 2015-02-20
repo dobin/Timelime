@@ -11,5 +11,8 @@ angular.module('myApp.Home', ['ngRoute'])
 
 .controller('HomeController', ['$scope', 'services',
     function ($scope, services) {
-
-    }]);
+        services.getUsers().then(function(data) {
+            $scope.users = data.data;
+        });
+    }
+]);

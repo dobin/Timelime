@@ -421,7 +421,10 @@ angular.module('myApp.links', ['ngRoute'])
                 ];
 
                 return f;
-                //return $http.get(serviceBase + 'formats');
+            }
+
+            obj.getUsers = function() {
+                return $http.get(serviceBase + 'users');
             }
 
             return obj;

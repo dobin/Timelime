@@ -59,7 +59,6 @@ function($http) {
 
 
 .controller('topicListCtrl', function($scope, TopicServices, AuthenticationService) {
-        console.log("A");
 	TopicServices.getTopicsForUser(AuthenticationService.getCurrentUserID()).then(function(data) {
 		$scope.topics = data.data;
 	});
