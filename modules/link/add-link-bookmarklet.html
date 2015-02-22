@@ -45,7 +45,7 @@
                     <span ng-show="myForm.link_datePublish.$dirty && myForm.link_datePublish.$invalid" class="help-inline">Publish Date Required</span>
                 </div>
 
-                <div class="col-xs-2 pull-right">
+                <div class="col-xs-2">
                     <button ng-click="setPublishToToday()">Today</button>
                 </div>
 
@@ -85,6 +85,7 @@
             </div>
         </div>
 
+
         <div class="row">
             <div class= "form-group">
                 <div class= "col-xs-12"> Options </div>
@@ -109,22 +110,33 @@
             </div>
         </div>
 
-        <div class="row">
 
-        <div class= "form-group">
-            <label class= "col-md-2"></label>
-            <div class="col-md-4">
-                <a ng-click="goBack()" class="btn">Cancel</a>
-                <button ng-click="saveLink(link, 'bookmarklet');"
-                        ng-disabled="isClean() || myForm.$invalid"
-                        class="btn btn-primary">{{buttonText}}</button>
-                <button ng-click="deleteLink(link)"
-                        ng-show="link.linkID" class="btn btn-warning">Delete</button>
+        <div class="row">
+            <div class= "form-group">
+                <div class= "col-xs-12"> Description </div>
+
+                <div class="col-xs-12">
+                    <textarea ng-model="link.description" type= "text" class="form-control" />
+                </div>
             </div>
         </div>
+
+
+        <div class="row">
+
+            <div class= "form-group">
+                <label class= "col-md-2"></label>
+                <div class="col-md-4">
+                    <a ng-click="goBack()" class="btn">Cancel</a>
+                    <button ng-click="saveLink(link, 'bookmarklet');"
+                            ng-disabled="isClean() || myForm.$invalid"
+                            class="btn btn-primary">{{buttonText}}</button>
+                    <button ng-click="deleteLink(link)"
+                            ng-show="link.linkID" class="btn btn-warning">Delete</button>
+                </div>
             </div>
+        </div>
 
     </div>
 
-    </div>
 </div>

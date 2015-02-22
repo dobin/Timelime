@@ -16,7 +16,7 @@ angular.module('myApp.timeline', ['ngRoute'])
                 }
             }
         })
-        .when('/timeline/:topicID', {
+        .when('/timeline/:userID', {
             title : 'Timeline',
             templateUrl : 'modules/timeline/timeline.html',
             controller : 'timelineListCtrl',
@@ -26,20 +26,23 @@ angular.module('myApp.timeline', ['ngRoute'])
                     return services.getLinksForUser(userID);
                 },
                 topics: function(TopicServices, $route) {
-                    return TopicServices.getTopic(topicID);
+                    var userID = $route.current.params.userID;
+                    return TopicServices.getTopicsForUser(userID);
                 }
             }
         })
-        .when('/mytimeline', {
-            title : 'My Timeline',
+        .when('/timeline/:userID/:topicID', {
+            title : 'Timeline',
             templateUrl : 'modules/timeline/timeline.html',
             controller : 'timelineListCtrl',
             resolve : {
                 data: function($route, services) {
-                    return services.getMyLinks();
+                    var userID = $route.current.params.userID;
+                    return services.getLinksForUser(userID);
                 },
                 topics: function(TopicServices, $route) {
-                    return TopicServices.getTopics();
+                    var userID = $route.current.params.userID;
+                    return TopicServices.getTopicsForUser(userID);
                 }
             }
         });
@@ -101,8 +104,7 @@ angular.module('myApp.timeline', ['ngRoute'])
         }
     })
 
-    .controller('timelineListCtrl', function($scope, $routeParams, $filter, data, services, ngTableParams, AuthenticationService, ReadstatusService, topics) {
-        //var linkID = ($routeParams.linkID) ? parseInt($routeParams.linkID) : 0;
+    .controller('timelineListCtrl', function($scope, $routeParams, $filter, data, services, ngTableParams, AuthenticationService, ReadstatusService, UserService, topics) {
         var linkID = $routeParams.linkID;
         $scope.user = AuthenticationService.getCurrentUser();
 
@@ -110,6 +112,30 @@ angular.module('myApp.timeline', ['ngRoute'])
         $scope.topics = topics.data;
         $scope.readStats = ReadstatusService.getReadstats();
 
+
+
+        // Check if its ours
+        var selectedUserID = $routeParams.userID;
+        $scope.dateFormat = 'dd.MM.yyyy';
+        if (selectedUserID) {
+            if (selectedUserID == AuthenticationService.getCurrentUserID()) {
+                $scope.isMy = true;
+                $scope.dateFormat = 'HH:mm dd.MM.yyyy';
+            } else {
+                $scope.isMy = false;
+                UserService.getUserInfo(selectedUserID).then(function (user) {
+                    $scope.selectedUser = user.data;
+                });
+            }
+        }
+
+        // Check if a topic is selected
+        var selectedTopicID = $routeParams.topicID;
+        if(selectedTopicID) {
+            $scope.selectedTopic = topics.getTopic(topicID);
+        }
+
+        // Check if a link is selected
         if (linkID) {
             /*
              var linkParam = $filter('filter')($scope.links, function (d) {
@@ -181,7 +207,7 @@ angular.module('myApp.timeline', ['ngRoute'])
         });
 
 
-        $scope.reloadTable = function(topic) {
+        $scope.reloadTable = function() {
             $scope.tableParams.reload();
         }
 

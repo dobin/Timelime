@@ -7,23 +7,42 @@
     <div class="col-md-12" ng-show="links.length > 0">
 
         <nav class= "navbar navbar-default" role= "navigation" >
-            <div class= "navbar-header" >
+            <div ng-show="isMy">
+                <div class= "navbar-header" >
+                    <p class="navbar-text">
+                        Topic:
+                        <select ng-change="reloadTable()" name="topic_filter" ng-model="topicFilter" ng-options="topic.topicName for topic in topics">
+                            <option value=""></option>
+                        </select>
+                    </p>
+
+                    <p class="navbar-text">
+                        Readstatus:
+                        <select ng-change="reloadTable()" name="readstatus_filter" ng-model="readStatusFilter" ng-options="readStat.text for readStat in readStats">
+                            <option value=""></option>
+                        </select>
+
+                    </p>
+                </div>
 
 
-                <p class="navbar-text">
-                Topic:
-                <select ng-change="reloadTable()" name="topic_filter" ng-model="topicFilter" ng-options="topic.topicName for topic in topics">
-                    <option value=""></option>
-                </select>
-                </p>
+            </div>
+            <div ng-show="!isMy">
+                <div class= "navbar-header" >
+                    <p class="navbar-text" ng-show="selectedUser">
+                        User: {{selectedUser.username}}
+                    </p>
+                    <p class="navbar-text" ng-show="selectedTopic">
+                        Topic: {{selectedTopic.topicName}}
+                    </p>
 
-                <p class="navbar-text">
-                Readstatus:
-                <select ng-change="reloadTable()" name="readstatus_filter" ng-model="readStatusFilter" ng-options="readStat.text for readStat in readStats">
-                    <option value=""></option>
-                </select>
-
-                </p>
+                    <p class="navbar-text" ng-show="!selectedUser">
+                        No user selected
+                    </p>
+                    <p class="navbar-text" ng-show="!selectedTopic">
+                        No topic selected
+                    </p>
+                </div>
             </div>
         </nav>
 
@@ -31,7 +50,7 @@
         <table ng-table="tableParams" show-filter="true" class="table timelinetable">
             <tr ng-repeat="link in $data">
                 <td class="col-md-2" style="text-align:right" data-title="'DateAdded'" sortable="'dateAdded'" filter="{ 'Date': 'text' }">
-                    <span class="timelineTitleBig">{{link.dateAdded | date :'HH:mm dd.MM.yyyy'}} </span><br>
+                    <span class="timelineTitleBig">{{link.dateAdded | date :dateFormat}} </span><br>
 
                     {{link.topic.topicName}}
 

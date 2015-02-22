@@ -28,16 +28,15 @@
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
                 <li>
-                    <a href="#/home" title="Home">Home</a>
-                </li>
-                <li>
                     <a href="#/timeline" title="My Timeline">Timeline</a>
                 </li>
 
                 <li ng-if="user.userID">
-                    <a href="#/mytimeline" title="My Timeline">My Timeline</a>
+                    <a ng-href="#/timeline/{{user.userID}}" title="My Timeline">My Timeline</a>
                 </li>
-
+                <li>
+                    <a href="#/home" title="Home">Users</a>
+                </li>
                 <li ng-if="user.userID">
                     <a href="#/mytopics" title="My Topics">My Topics</a>
                 </li>
@@ -82,12 +81,13 @@
     <script src="modules/authentication/AuthenticationController.js"></script>
     <script src="modules/home/HomeController.js"></script>
     <script src="modules/timeline/TimelineController.js"></script>
-    <script src="modules/topics/TopicService.js"></script>
     <script src="modules/topics/TopicController.js"></script>
+    <script src="modules/topics/TopicService.js"></script>
     <script src="modules/link/LinkController.js"></script>
     <script src="modules/link/LinkService.js"></script>
     <script src="modules/tags/controllers.js"></script>
     <script src="modules/readstatus/ReadstatusController.js"></script>
     <script src="modules/about/aboutController.js"></script>
+    <script src="modules/user/UserService.js"></script>
 </body>
 </html>

@@ -11,6 +11,7 @@ var app = angular.module('myApp', [
 	'myApp.links',
 	'myApp.tags',
     'myApp.Readstatus',
+    'myApp.User',
     'myApp.about',
 	'ngCookies']);
 

@@ -1,0 +1,16 @@
+            <div class= "navbar-header" >
+                <p class="navbar-text">
+                    Topic:
+                    <select ng-change="reloadTable()" name="topic_filter" ng-model="topicFilter" ng-options="topic.topicName for topic in topics">
+                        <option value=""></option>
+                    </select>
+                </p>
+
+                <p class="navbar-text">
+                    Readstatus:
+                    <select ng-change="reloadTable()" name="readstatus_filter" ng-model="readStatusFilter" ng-options="readStat.text for readStat in readStats">
+                        <option value=""></option>
+                    </select>
+
+                </p>
+            </div>

@@ -618,21 +618,41 @@ class API extends REST {
 
 
 
-		private function users() {
-    		if ($this -> get_request_method() != "GET") {
-    			$this -> response('', 406);
-    		}
+    private function users() {
+        if ($this -> get_request_method() != "GET") {
+            $this -> response('', 406);
+        }
 
-            $mongousers = $this->mongoDB->selectCollection('users');
+        $mongousers = $this->mongoDB->selectCollection('users');
 
-            $searchArr = array();
-            $usersCursor = $mongousers->find($searchArr);
-            $users = [];
-            foreach($usersCursor as $user) {
-                $users[] = $user;
-            }
-            $this->response($this->json($users), 200);
-    	}
+        $searchArr = array();
+        $usersCursor = $mongousers->find($searchArr);
+        $users = [];
+        foreach($usersCursor as $user) {
+            $users[] = $user;
+        }
+        $this->response($this->json($users), 200);
+    }
+
+
+    private function user() {
+        if ($this -> get_request_method() != "GET") {
+            $this -> response('', 406);
+        }
+
+        $userID = $this->_request['id'];
+        $mongousers = $this->mongoDB->selectCollection('users');
+        $searchArr = array('userID' => $userID);
+        $user = $mongousers->findOne($searchArr);
+
+        $publicUser = array (
+            'username' => $user['username'],
+            'userID' => $user['userID'],
+        );
+        error_log($this->json($publicUser));
+
+        $this->response($this->json($publicUser), 200);
+    }
 
 
 	/*
