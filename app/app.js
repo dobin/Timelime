@@ -36,10 +36,6 @@ app.run(['$location', '$rootScope', 'AuthenticationService', function($location,
                 $location.path("/login");
             }
         }
-
-        //if(! AuthenticationService.isLoggedin()) {
-        //    $location.path('/login');
-        //}
     });
 }]);
 
@@ -55,6 +51,7 @@ app.config(['$routeProvider', function($routeProvider) {
 		redirectTo : '/timeline'
 	});
 }]);
+
 
 app.config(function($httpProvider) {
     $httpProvider.interceptors.push(['$q', '$location', '$rootScope', function ($q, $location, $rootScope) {

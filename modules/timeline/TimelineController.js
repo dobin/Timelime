@@ -130,6 +130,8 @@ angular.module('myApp.timeline', ['ngRoute'])
         // Check if a topic is selected
         var selectedTopicID = $routeParams.topicID;
         if(selectedTopicID) {
+            console.log("BB: " + $scope.isSelected);
+
             var found = $filter('filter')($scope.topics, { topicID: selectedTopicID}, true);
             $scope.topicFilter = found[0];
         }
@@ -140,11 +142,14 @@ angular.module('myApp.timeline', ['ngRoute'])
              var linkParam = $filter('filter')($scope.links, function (d) {
              return d.linkID == linkID;
              })[0];*/
+            console.log("YES1");
 
             for(var i=0; i<$scope.links.length; i++) {
                 if (angular.equals($scope.links[i].linkID, linkID)) {
+                    console.log("YES2");
                     $scope.selectedLink = $scope.links[i];
                     $scope.links[i].isSelected = true;
+                    ///$scope.viewLink(links[i]);
                 }
             }
         }
@@ -229,18 +234,14 @@ angular.module('myApp.timeline', ['ngRoute'])
         };
 
         $scope.viewLink = function(link) {
+            console.log("VIEW");
             if ($scope.selectedLink == link) {
-                $scope.selectedLink.isSelected = false;
+                //$scope.selectedLink.isSelected = false;
                 $scope.selectedLink = null;
                 return;
             }
 
-            if ($scope.selectedLink) {
-                $scope.selectedLink.isSelected = false;
-            }
-
             $scope.selectedLink = link;
-            link.isSelected = true;
         }
     })
 

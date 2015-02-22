@@ -6,12 +6,12 @@
                 <div class="row">
                     <div class= "col-md-3"> Title </div>
                     <div class="col-md-9">
-                        {{selectedLink.linkName}}
+                        {{selectedLink.linkName}} &nbsp;
                     </div>
 
                     <div class="col-md-3"> URL </div>
                     <div class="col-md-8">
-                        {{selectedLink.linkURL}}
+                        {{selectedLink.linkURL}} &nbsp;
                     </div>
                     <div class="col-md-1">
                         {{selectedLink.formatID}}
@@ -24,7 +24,7 @@
 
                     <div class="col-md-3"> Topic </div>
                     <div class="col-md-9">
-                        {{selectedLink.topic.topicID}}
+                        {{selectedLink.topic.topicID}} &nbsp;
                     </div>
 
                     <div class="col-md-3"> Tags </div>
@@ -32,6 +32,12 @@
                         TODO TAGS
                     </div>
 
+                    <div ng-if="selectedLink.description">
+                        <div class="col-md-3"> Description </div>
+                        <div class="col-md-9">
+                            {{selectedLink.description}} &nbsp;
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

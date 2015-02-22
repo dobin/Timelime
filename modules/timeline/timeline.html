@@ -79,8 +79,7 @@
                     </div>
 
                     <br>
-
-                    <span ng-if="link.isSelected">
+                    <span ng-if="link.linkID == selectedLink.linkID">
                     <div class="custom">
                         <div ng-include="'modules/timeline/view-timeline-link.html'"></div>
                     </div>
