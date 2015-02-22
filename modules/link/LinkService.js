@@ -12,10 +12,6 @@ angular.module('myApp.links')
             var readStats = ReadstatusService.getReadstatusTextFor(link.readStatus);
             link.readStatusTextRo = readStats;
 
-            /*if (link.tagsJSON.length > 0) {
-             link.tags = angular.fromJson(link.tagsJSON);
-             }*/
-
             link.dateAdded = new Date(link.dateAdded);
             if (link.datePublish != null) {
                 link.datePublish = new Date(link.datePublish);
@@ -37,6 +33,7 @@ angular.module('myApp.links')
             return links;
         }
 
+
         obj.getLinksForUser = function(userID) {
             var links = $http.get(serviceBase + 'links?userID=' + userID);
 
@@ -56,8 +53,8 @@ angular.module('myApp.links')
         }
 
 
-        obj.getLinksForTopic = function(topic) {
-            var links = $http.get(serviceBase + 'links?topicID=' + topic.topicID);
+        obj.getLinksForTopic = function(topicID) {
+            var links = $http.get(serviceBase + 'links?topicID=' + topicID);
 
             links.success(function(linkss) {
                 //for(var link in linkss) {
@@ -69,6 +66,7 @@ angular.module('myApp.links')
 
             return links;
         }
+
 
         obj.getMyLinks = function() {
             var userID = AuthenticationService.getCurrentUserID();
@@ -85,6 +83,7 @@ angular.module('myApp.links')
             return links;
         }
 
+
         obj.checkIfLinkExists = function(link) {
             var userID = AuthenticationService.getCurrentUserID();
 
@@ -92,6 +91,7 @@ angular.module('myApp.links')
                 return results;
             });
         }
+
 
         obj.getLink = function(linkID) {
             var link = $http.get(serviceBase + 'link?id=' + linkID);
@@ -112,6 +112,7 @@ angular.module('myApp.links')
             });
         };
 
+
         obj.updateLink = function(id, link) {
             /*if ('tags' in link) {
              link.tagsJSON = JSON.stringify(link.tags);
@@ -124,6 +125,7 @@ angular.module('myApp.links')
                 return status.data;
             });
         };
+
 
         obj.deleteLink = function(id) {
             return $http.delete(serviceBase + 'deleteLink?id=' + id).then(function(status) {

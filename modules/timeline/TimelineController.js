@@ -37,8 +37,8 @@ angular.module('myApp.timeline', ['ngRoute'])
             controller : 'timelineListCtrl',
             resolve : {
                 data: function($route, services) {
-                    var userID = $route.current.params.userID;
-                    return services.getLinksForUser(userID);
+                    var topicID = $route.current.params.topicID;
+                    return services.getLinksForTopic(topicID);
                 },
                 topics: function(TopicServices, $route) {
                     var userID = $route.current.params.userID;
@@ -104,15 +104,13 @@ angular.module('myApp.timeline', ['ngRoute'])
         }
     })
 
-    .controller('timelineListCtrl', function($scope, $routeParams, $filter, data, services, ngTableParams, AuthenticationService, ReadstatusService, UserService, topics) {
+    .controller('timelineListCtrl', function($scope, $routeParams, $filter, $location, data, services, ngTableParams, AuthenticationService, ReadstatusService, UserService, TopicServices, topics) {
         var linkID = $routeParams.linkID;
         $scope.user = AuthenticationService.getCurrentUser();
 
         $scope.links = data.data;
         $scope.topics = topics.data;
         $scope.readStats = ReadstatusService.getReadstats();
-
-
 
         // Check if its ours
         var selectedUserID = $routeParams.userID;
@@ -132,7 +130,8 @@ angular.module('myApp.timeline', ['ngRoute'])
         // Check if a topic is selected
         var selectedTopicID = $routeParams.topicID;
         if(selectedTopicID) {
-            $scope.selectedTopic = topics.getTopic(topicID);
+            var found = $filter('filter')($scope.topics, { topicID: selectedTopicID}, true);
+            $scope.topicFilter = found[0];
         }
 
         // Check if a link is selected
@@ -208,6 +207,11 @@ angular.module('myApp.timeline', ['ngRoute'])
 
 
         $scope.reloadTable = function() {
+            if ($scope.topicFilter) {
+                $location.path("/timeline/" + selectedUserID + "/" + $scope.topicFilter.topicID);
+            } else {
+                $location.path("/timeline/" + selectedUserID);
+            }
             $scope.tableParams.reload();
         }
 

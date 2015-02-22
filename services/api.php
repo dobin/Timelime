@@ -259,7 +259,7 @@ class API extends REST {
             if (! is_null($userID)) {
                 $searchArr = array('user.userID' => $userID, 'topicID' => $topicID);
             } else {
-                $searchArr = array('user.topicID' => $topicID);
+                $searchArr = array('topic.topicID' => $topicID);
             }
         } else {
             if (! is_null($userID)) {
