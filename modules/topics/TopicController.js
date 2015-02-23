@@ -7,7 +7,7 @@ angular.module('myApp.topics', ['ngRoute'])
 		templateUrl : 'modules/topics/topics.html',
 		controller : 'topicListCtrl'
     });
-    $routeProvider.when('/edit-topic/:topicID', {
+    $routeProvider.when('/edit-topic/:userID/:topicID', {
         title : 'Topics',
         templateUrl : 'modules/topics/edit-topic.html',
         controller : 'topicEditCtrl'

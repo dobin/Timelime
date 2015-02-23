@@ -568,14 +568,30 @@ class API extends REST {
 		$id = $data['id'];
 
 		if (! $this->canWriteTopic($userID, $id)) {
-		    error_log("UserID: $userID   ID: $id");
 			$this -> response('', 401);
             return;
 		}
 
+
         $mongoTopics = $this->mongoDB->selectCollection('topics');
         $searchArr = array('topicID' => $topic['topicID']);
+        // Rename all links containing this topic, if necessary
+        $originalTopic = $mongoTopics->findOne($searchArr);
+
+        // Edit topic in topics
         $mongoTopics->update($searchArr, $topic);
+
+        // Update topic.topicName for all links where and if necessary
+        if ($originalTopic['topicName'] != $topic['topicName']) {
+            $mongoLinks = $this->mongoDB->selectCollection('links');
+            $searchArrLinks = array('topic.topicID' => $topic['topicID']);
+            $mongoLinks->update(
+                $searchArrLinks,
+                array('$set' => array('topic.topicName' => $topic['topicName'])),
+                array( 'multiple' => true )
+             );
+        }
+
 
         if (false) {
             error_log("NOPE");

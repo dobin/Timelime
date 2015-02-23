@@ -236,12 +236,11 @@ angular.module('myApp.timeline', ['ngRoute'])
         $scope.viewLink = function(link) {
             console.log("VIEW");
             if ($scope.selectedLink == link) {
-                //$scope.selectedLink.isSelected = false;
                 $scope.selectedLink = null;
                 return;
+            } else {
+                $scope.selectedLink = link;
             }
-
-            $scope.selectedLink = link;
         }
     })
 
