@@ -34,3 +34,7 @@ ul>li, a{cursor: pointer;}
 .timelineDateSmall {
     font-size: 90%;
 }
+
+.margin-top {
+    margin-top:12px;
+}
