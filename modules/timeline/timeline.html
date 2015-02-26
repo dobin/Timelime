@@ -8,9 +8,9 @@
         <ui-select ng-change="reloadTable()" ng-model="topic.selected"  ng-disabled="disabled" style="min-width: 200px;" title="Choose a topic">
             <ui-select-match placeholder="Select a topic in the list or search...">{{$select.selected.topicName}}</ui-select-match>
             <ui-select-choices repeat="topic in topics | propsFilter: {topicName: $select.search}">
-                <div ng-bind-html="topic.topicID + ' ' + topic.topicName | highlight: $select.search"></div>
+                <div ng-bind-html="topic.parentTopic.topicName + ' / ' + topic.topicName | highlight: $select.search"></div>
                 <small>
-                    {{topic.topicParent.topicName}}
+                    {{topic.parentTopic.topicName}}
                     {{topic.topicDescription}}
                 </small>
             </ui-select-choices>
@@ -32,9 +32,6 @@
     <div class="col-md-12" ng-show="links.length > 0">
 
         <nav class= "navbar-left navbar-form" role= "navigation" >
-
-
-
             <div ng-show="!isMy">
                 <div class= "navbar-header" >
                     <p class="navbar-text" ng-show="selectedUser">

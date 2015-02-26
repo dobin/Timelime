@@ -26,6 +26,10 @@ angular.module('myApp.topics', ['ngRoute'])
 .controller('topicEditCtrl', function($scope, $routeParams, $location, TopicServices, AuthenticationService) {
     var topicID = $routeParams.topicID;
 
+    TopicServices.getTopicsForUser(AuthenticationService.getCurrentUserID()).then(function(data) {
+        $scope.topics = data.data;
+    });
+
     TopicServices.getTopic(topicID).then(function(data) {
         $scope.topic = data.data;
     });
@@ -45,6 +49,10 @@ angular.module('myApp.topics', ['ngRoute'])
 
     $scope.saveTopic = function(topic) {
         if (AuthenticationService.isLoggedin()) {
+
+            // Todo: move to service or api
+            var foundTopic = _.findWhere($scope.topics, {topicID: topic.parentTopic.topicID});
+            topic.parentTopic.topicName = foundTopic.topicName;
 
             $location.path('/');
             if (topicID <= 0) {

@@ -14,9 +14,9 @@
         <th>Action</th>
         </thead>
         <tbody>
-            <tr ng-repeat="data in topics track by $index">
+            <tr ng-repeat="data in topics | orderBy: ['parentTopic.topicName', 'topicName'] track by $index">
                 <td>
-                    <b>{{data.topicName}}</b>
+                    <b>{{data.parentTopic.topicName}} / {{data.topicName}}</b>
                 <p>
                     {{data.description}}
                 </p>
