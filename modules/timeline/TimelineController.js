@@ -104,13 +104,16 @@ angular.module('myApp.timeline', ['ngRoute'])
         }
     })
 
-    .controller('timelineListCtrl', function($scope, $routeParams, $filter, $location, data, services, ngTableParams, AuthenticationService, ReadstatusService, UserService, TopicServices, topics) {
+    .controller('timelineListCtrl', function($scope, $http, $routeParams, $filter, $location, data, services, ngTableParams, AuthenticationService, ReadstatusService, UserService, TopicServices, topics) {
         var linkID = $routeParams.linkID;
         $scope.user = AuthenticationService.getCurrentUser();
 
         $scope.links = data.data;
         $scope.topics = topics.data;
         $scope.readStats = ReadstatusService.getReadstats();
+
+        // For topic search
+        $scope.topic = {};
 
         var initialSearchStatus = $location.search().readStatus;
         $scope.readStatusFilter = $scope.readStats[initialSearchStatus];
@@ -134,7 +137,7 @@ angular.module('myApp.timeline', ['ngRoute'])
         var selectedTopicID = $routeParams.topicID;
         if(selectedTopicID) {
             var found = $filter('filter')($scope.topics, { topicID: selectedTopicID}, true);
-            $scope.topicFilter = found[0];
+            $scope.topic.selected = found[0];
         }
 
         // Check if a link is selected
@@ -189,7 +192,7 @@ angular.module('myApp.timeline', ['ngRoute'])
                 }
 
                 //if($scope.topicFilter) {
-                    orderedData = $filter('topicFilter')(orderedData, $scope.topicFilter, $scope.readStatusFilter);
+                    orderedData = $filter('topicFilter')(orderedData, $scope.topic.selected, $scope.readStatusFilter);
                 //}
                 //if($scope.readStatusfilter) {
                 //    orderedData = $filter('topicFilter')(orderedData, $scope.topicFilter);
@@ -211,8 +214,8 @@ angular.module('myApp.timeline', ['ngRoute'])
 
         $scope.reloadTable = function() {
             var path = "";
-            if ($scope.topicFilter) {
-                path += "/timeline/" + selectedUserID + "/" + $scope.topicFilter.topicID;
+            if ($scope.topic.selected) {
+                path += "/timeline/" + selectedUserID + "/" + $scope.topic.selected.topicID;
             } else {
                 path += "/timeline/" + selectedUserID;
             }
@@ -240,7 +243,6 @@ angular.module('myApp.timeline', ['ngRoute'])
             services.updateLink(link.linkID, link);
         };
 
-
         $scope.viewLink = function(link) {
             if ($scope.selectedLink == link) {
                 $scope.selectedLink = null;
@@ -249,6 +251,12 @@ angular.module('myApp.timeline', ['ngRoute'])
                 $scope.selectedLink = link;
             }
         }
+
+        $scope.removeTopicFilter = function() {
+            $scope.topic.selected = undefined;
+            $scope.reloadTable();
+        }
+
     })
 
 ;

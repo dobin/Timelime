@@ -2,31 +2,39 @@
     body    {overflow-y:scroll;}
 </style>
 
+<div class="row">
+    <div class="col-md-4">
+
+        <ui-select ng-change="reloadTable()" ng-model="topic.selected"  ng-disabled="disabled" style="min-width: 200px;" title="Choose a topic">
+            <ui-select-match placeholder="Select a topic in the list or search...">{{$select.selected.topicName}}</ui-select-match>
+            <ui-select-choices repeat="topic in topics | propsFilter: {topicName: $select.search}">
+                <div ng-bind-html="topic.topicID + ' ' + topic.topicName | highlight: $select.search"></div>
+                <small>
+                    {{topic.topicParent.topicName}}
+                    {{topic.topicDescription}}
+                </small>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+    <div class="col-md-1">
+        <button class="btn btn-default btn-xs " ng-click="removeTopicFilter()">X</button>
+    </div>
+
+    <div class="col-md-2">
+        Readstatus:
+        <select ng-change="reloadTable()" name="readstatus_filter" ng-model="readStatusFilter" ng-options="readStat.text for readStat in readStats">
+            <option value=""></option>
+        </select>
+    </div>
+</div>
 
 <div class="row">
     <div class="col-md-12" ng-show="links.length > 0">
 
-        <nav class= "navbar navbar-default" role= "navigation" >
-            <div ng-show="isMy">
-                <div class= "navbar-header" >
-                    <p class="navbar-text">
-                        Topic:
-                        <select ng-change="reloadTable()" name="topic_filter" ng-model="topicFilter" ng-options="topic.topicName for topic in topics">
-                            <option value=""></option>
-                        </select>
-                    </p>
-
-                    <p class="navbar-text">
-                        Readstatus:
-                        <select ng-change="reloadTable()" name="readstatus_filter" ng-model="readStatusFilter" ng-options="readStat.text for readStat in readStats">
-                            <option value=""></option>
-                        </select>
-
-                    </p>
-                </div>
+        <nav class= "navbar-left navbar-form" role= "navigation" >
 
 
-            </div>
+
             <div ng-show="!isMy">
                 <div class= "navbar-header" >
                     <p class="navbar-text" ng-show="selectedUser">
