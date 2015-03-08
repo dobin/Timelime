@@ -92,9 +92,9 @@
                 </div>
 
                 <div class="col-xs-3 pull-right">
-                    <select name="format_id" class="pull-right"
-                            ng-model="link.formatID"
-                            ng-options="format.linkFormatID as format.formatName for format in formats"
+                    <select name="format_id"
+                            ng-model="link.format"
+                            ng-options="format.formatName as format.formatName for format in formats"
                             required>
                     </select>
                     <span ng-show="myForm.format_id.$dirty && myForm.format_id.$invalid" class="help-inline">Format Required</span>
