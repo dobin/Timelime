@@ -114,22 +114,25 @@ angular.module('myApp.timeline', ['ngRoute'])
 
         // For topic search
         $scope.topic = {};
+        $scope.readStat = {};
 
         var initialSearchStatus = $location.search().readStatus;
-        $scope.readStatusFilter = $scope.readStats[initialSearchStatus];
+        $scope.readStat.selected = $scope.readStats[initialSearchStatus];
 
         // Check if its ours
         var selectedUserID = $routeParams.userID;
         $scope.dateFormat = 'dd.MM.yyyy';
         if (selectedUserID) {
+            UserService.getUserInfo(selectedUserID).then(function (user) {
+                $scope.selectedUser = user.data;
+            });
+
             if (selectedUserID == AuthenticationService.getCurrentUserID()) {
                 $scope.isMy = true;
                 $scope.dateFormat = 'HH:mm dd.MM.yyyy';
             } else {
                 $scope.isMy = false;
-                UserService.getUserInfo(selectedUserID).then(function (user) {
-                    $scope.selectedUser = user.data;
-                });
+
             }
         }
 
@@ -192,7 +195,7 @@ angular.module('myApp.timeline', ['ngRoute'])
                 }
 
                 //if($scope.topicFilter) {
-                    orderedData = $filter('topicFilter')(orderedData, $scope.topic.selected, $scope.readStatusFilter);
+                    orderedData = $filter('topicFilter')(orderedData, $scope.topic.selected, $scope.readStat.selected);
                 //}
                 //if($scope.readStatusfilter) {
                 //    orderedData = $filter('topicFilter')(orderedData, $scope.topicFilter);
@@ -220,8 +223,10 @@ angular.module('myApp.timeline', ['ngRoute'])
                 path += "/timeline/" + selectedUserID;
             }
 
-            if ($scope.readStatusFilter != null) {
-                $location.path(path).search('readStatus', $scope.readStatusFilter.id);
+            //if ($scope.readStatusFilter != null) {
+                //$location.path(path).search('readStatus', $scope.readStatusFilter.id);
+            if ($scope.readStat != null && $scope.readStat.selected != null) {
+                $location.path(path).search('readStatus', $scope.readStat.selected.id);
             } else {
                 $location.path(path).search('');
             }
