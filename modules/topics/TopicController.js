@@ -51,8 +51,10 @@ angular.module('myApp.topics', ['ngRoute'])
         if (AuthenticationService.isLoggedin()) {
 
             // Todo: move to service or api
-            var foundTopic = _.findWhere($scope.topics, {topicID: topic.parentTopic.topicID});
-            topic.parentTopic.topicName = foundTopic.topicName;
+            if (topic.parentTopic) {
+                var foundTopic = _.findWhere($scope.topics, {topicID: topic.parentTopic.topicID});
+                topic.parentTopic.topicName = foundTopic.topicName;
+            }
 
             $location.path('/');
             if (topicID <= 0) {

@@ -58,8 +58,7 @@
                 <div class="col-md-10">
                     <select name="topic_permission"
                             ng-model="topic.parentTopic.topicID"
-                            ng-options="topic.topicID as topic.topicName for topic in topics | orderBy: ['parentTopic.topicName', 'topicName'] ",
-                            required>
+                            ng-options="topic.topicID as topic.topicName for topic in topics | orderBy: ['parentTopic.topicName', 'topicName'] ">
                     </select>
                 </div>
             </div>

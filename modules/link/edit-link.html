@@ -39,8 +39,8 @@
 
             <div class="col-md-2">
                 <select name="format_id"
-                        ng-model="link.formatID"
-                        ng-options="format.linkFormatID as format.formatName for format in formats"
+                        ng-model="link.format"
+                        ng-options="format.formatName as format.formatName for format in formats"
                         required>
 
                 </select>
@@ -82,7 +82,7 @@
             <div class="col-md-3">
                 <select name="link_topicid"
                         ng-model="link.topic.topicID"
-                        ng-options="topic.topicID as topic.topicName for topic in topics"
+                        ng-options="topic.topicID as topic.topicName for topic in topics | orderBy:'topicName'"
                         required>
                 </select>
             </div>

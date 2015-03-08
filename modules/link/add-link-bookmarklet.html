@@ -59,7 +59,7 @@
                 <div class="col-xs-3">
                     <select name="link_topicid"
                             ng-model="link.topic.topicID"
-                            ng-options="topic.topicID as topic.topicName for topic in topics"
+                            ng-options="topic.topicID as topic.topicName for topic in topics | orderBy:'topicName'"
                             required>
                     </select>
                 </div>

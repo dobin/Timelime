@@ -31,7 +31,9 @@ class API extends REST {
 	private function dbConnect() {
 		$this -> mysqli = new mysqli(self::DB_SERVER, self::DB_USER, self::DB_PASSWORD, self::DB);
 
-		$this->mongoCon = new Mongo("mongodb://localhost");
+		$this->mongoCon = new MongoClient();
+
+//		$this->mongoCon = new Mongo("mongodb://localhost");
 		$this->mongoDB = $this->mongoCon->selectDB('timelime');
 	}
 
@@ -124,8 +126,8 @@ class API extends REST {
 
         $mongoUsers = $this->mongoDB->users;
         $mongoUsers->drop();
-        $users = [];
-        $userT = [];
+        $users = array();
+        $userT = array();
         $query = "SELECT * FROM users";
         $r = $this -> mysqli -> query($query) or die($this -> mysqli -> error . __LINE__);
   		if ($r -> num_rows > 0) {
@@ -146,8 +148,8 @@ class API extends REST {
 
         $mongoTopics = $this->mongoDB->topics;
         $mongoTopics->drop();
-        $topics = [];
-        $topicT = [];
+        $topics = array();
+        $topicT = array();
         $query = "SELECT * FROM topics";
         $r = $this -> mysqli -> query($query) or die($this -> mysqli -> error . __LINE__);
   		if ($r -> num_rows > 0) {
@@ -170,7 +172,7 @@ class API extends REST {
 	    $out .= "\n";
 	    $out .= $this->json($topics) . "\n";
 
-        $linkFormats = [];
+        $linkFormats = array();
         $query = "SELECT * FROM linkFormats";
         $r = $this -> mysqli -> query($query) or die($this -> mysqli -> error . __LINE__);
         if ($r -> num_rows > 0) {
@@ -188,25 +190,25 @@ class API extends REST {
         $query .= " FROM links c INNER JOIN topics t ON c.topicID = t.topicID INNER JOIN linkFormats l ON c.formatID = l.linkFormatID INNER JOIN users u ON u.userID = t.userID ";
         $query .= "  ORDER BY c.linkID DESC";
   	    $r = $this -> mysqli -> query($query) or die($this -> mysqli -> error . __LINE__);
-  	    $links = [];
+  	    $links = array();
   		if ($r -> num_rows > 0) {
 	        while ($link = $r -> fetch_assoc()) {
 				// User
                 $link['userID'] = $userT[ $link['userID'] ];
-				$link['user'] = [
+				$link['user'] = array(
 				    'userName' => $link['userName'],
 				    'userID' => $link['userID'],
-				];
+				);
 				unset($link['userName']);
 				unset($link['userID']);
 
 				// Topic
                 $link['topicID'] = $topiT[ $link['topicID'] ];
-				$link['topic'] = [
+				$link['topic'] = array ( 
 				    'topicName' => $link['topicName'],
 				    'topicID' => $link['topicID'],
                     'topicPermissions' => $link['userPriv'],
-				];
+				);
 				unset($link['topicName']);
 				unset($link['topicID']);
 				unset($link['userPriv']);
@@ -270,7 +272,7 @@ class API extends REST {
         }
         $linksCursor = $mongoLinks->find($searchArr);
 
-        $links = [];
+        $links = array();
         foreach($linksCursor as $link) {
             $links[] = $link;
         }
@@ -496,7 +498,7 @@ class API extends REST {
 
         $searchArr = array();
         $topicsCursor = $mongoTopics->find($searchArr);
-        $topics = [];
+        $topics = array();
         foreach($topicsCursor as $topic) {
             $topics[] = $topic;
         }
@@ -513,7 +515,7 @@ class API extends REST {
 
         $searchArr = array('userID' => $userID);
         $topicsCursor = $mongoTopics->find($searchArr);
-        $topics = [];
+        $topics = array();
         foreach($topicsCursor as $topic) {
             $topics[] = $topic;
         }
@@ -643,7 +645,7 @@ class API extends REST {
 
         $searchArr = array();
         $usersCursor = $mongousers->find($searchArr);
-        $users = [];
+        $users = array();
         foreach($usersCursor as $user) {
             $users[] = $user;
         }
