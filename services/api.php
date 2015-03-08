@@ -121,6 +121,30 @@ class API extends REST {
 	}
 
 
+    private function fixMongo() {
+        $mongoLinks = $this->mongoDB->selectCollection('links');
+        $searchArr = array();
+        $linksCursor = $mongoLinks->find($searchArr);
+
+        $links = array();
+        foreach($linksCursor as $link) {
+
+            if (isset($link['tagsJSON'])) {
+            error_log("Y: " . $link['tagsJSON']);
+                $link['tags'] = json_decode($link['tagsJSON']);
+                unset($link['tagsJSON']);
+            }
+
+            $links[] = $link;
+        }
+
+        $mongoLinks->drop();
+
+        foreach($links as $link) {
+            $mongoLinks->insert($link);
+        }
+    }
+
     private function initMongo() {
         $out = "Init dä möngi\n";
 
@@ -212,6 +236,9 @@ class API extends REST {
 				unset($link['topicName']);
 				unset($link['topicID']);
 				unset($link['userPriv']);
+
+				// Tags
+				//$link['tags'] = json_decode($link
 
 				// Format
 				$link['format'] = $link['formatName'];
