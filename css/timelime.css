@@ -47,3 +47,5 @@ ul>li, a{cursor: pointer;}
 .selectize-control > .selectize-dropdown {
     top: 36px;
 }
+
+.none {display: none;}
