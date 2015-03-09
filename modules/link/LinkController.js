@@ -188,10 +188,10 @@ angular.module('myApp.links', ['ngRoute'])
 
         $scope.link.readStatus = '0';
         $scope.link.readStatusInitial = '0';
-        $scope.link.formatID = '1';
         $scope.link.user = {
             userPriv: '0'
         };
+        $scope.link.format = "website";
 
         // for adding a link via bookmarklet
         if ($routeParams.url) {
@@ -224,7 +224,7 @@ angular.module('myApp.links', ['ngRoute'])
 
         $scope.deleteLink = function(link) {
             $location.path('/');
-            if (confirm("Are you sure to delete link number: " + $scope.link.topicID) == true)
+            if (confirm("Are you sure to delete link number: " + $scope.linkID) == true)
                 services.deleteLink(link.linkID);
         }
 
@@ -243,7 +243,7 @@ angular.module('myApp.links', ['ngRoute'])
                     services.insertLink(link);
                 }
             } else {
-                alert("User nog logged in");
+                alert("User not logged in");
             }
         };
 
