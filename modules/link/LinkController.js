@@ -157,7 +157,7 @@ angular.module('myApp.links', ['ngRoute'])
                     topicName: $scope.newTopic,
                     description: "",
                     userID: AuthenticationService.getCurrentUserID,
-                    userPrivs: 0};
+                    userPriv: 0};
                 TopicServices.insertTopic(t).then(function(data) {
                     $scope.reloadTopics();
                     $scope.link.topicID = data.data.topicID.toString();
@@ -192,6 +192,7 @@ angular.module('myApp.links', ['ngRoute'])
             userPriv: '0'
         };
         $scope.link.format = "website";
+        $scope.link.topic = {};
 
         // for adding a link via bookmarklet
         if ($routeParams.url) {
@@ -259,10 +260,10 @@ angular.module('myApp.links', ['ngRoute'])
                     topicName: $scope.newTopic,
                     description: "",
                     userID: AuthenticationService.getCurrentUserID,
-                    userPrivs: 0};
+                    userPriv: 0};
                 TopicServices.insertTopic(t).then(function(data) {
                     $scope.reloadTopics();
-                    $scope.link.topicID = data.data.topicID.toString();
+                    $scope.link.topic.topicID = data.data.topicID;
                 });
             } else {
                 alert("User nog logged in");

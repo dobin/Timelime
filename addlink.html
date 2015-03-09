@@ -28,9 +28,12 @@
   } 
     return query_string;
 } ();
-
 	var linkUrl = encodeURIComponent(QueryString.url);
 	var linkTitle = encodeURIComponent(QueryString.title);
+
+    if (linkTitle.length <= 0) {
+        linkTitle = "No initial title"
+    }
 
 	var url = 'index.html#add-link/0/' + linkTitle + '/' + linkUrl;
  

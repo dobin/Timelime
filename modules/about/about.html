@@ -6,8 +6,49 @@
     <h2> Button </h2>
 
     Drag the following link/bookmarklet to your browsers bookmark: <br>
-    <a href="javascript:(function(){var a=window,b=document,c=encodeURIComponent,e=c(document.title),d=a.open('http://www.haking.ch/addlink.html?output=popup&url='+c(b.location)+'&title='+e,'bkmk_popup','left='+((a.screenX||a.screenLeft)+10)+',top='+((a.screenY||a.screenTop)+10)+',height=700px,width=550px,resizable=1,alwaysRaised=1');a.setTimeout(function(){d.focus()},300);})();">Add to Timelime</a>
+    <a href="javascript:(function(){var a=window,b=document,c=encodeURIComponent,e=c(document.title)||'No title',d=a.open('http://www.haking.ch/addlink.html?output=popup&url='+c(b.location)+'&title='+e,'bkmk_popup','left='+((a.screenX||a.screenLeft)+10)+',top='+((a.screenY||a.screenTop)+10)+',height=700px,width=550px,resizable=1,alwaysRaised=1');a.setTimeout(function(){d.focus()},300);})();">Add to Timelime</a>
     <br>
     Click it when you want to add a link to Timelime quickly.
+
+
+    <h2> Description </h2>
+    <h3> Why? </h3>
+
+    Too many links. Too many news. Bookmarks are overflowing.
+
+
+    <h3> What is timelime? </h3>
+
+    A webapp which lets you manage internet links. Or in other words, enrich URL's with additional metadata like tags, description or publish date. The primary information is the time you added the link to timelime.
+    It should enable to categorize and annotate links you use for your daily life or work.
+
+
+    <h3> Why another bookmark manager? </h3>
+
+    The basic idea of the WWW is or was, that every information should be accessible via a URL (Uniform Resource Locator). The internet has (or will have) the complete knowledge of humanity, readily available at your fingertips. Sadly the window/portal to the internet is either Google for "older" information. Or news sites like twitter, RSS feeds, news aggregators, FB and G+ for newly identified information. As google does not allow to search "your visited pages", it is necessary to manually add them to a centralized storage.
+
+    Traditional bookmark managers store links in hierachal structures, and maybe add tags. This is ok for a few dozen or hundred links, but does not work for more.
+
+
+    <h3> What is the difference to delicious? </h3>
+
+    Delicious supports only tags. It is intended to show off new and interesting links. It is not intended to manage or find old links.
+
+
+    <h3> What is the difference to pocket? </h3>
+
+    Pocket is really similar, but lacks in certain areas. Especially the search feature is not mighty enough (its only possible to search for one tag, not multiple tags).
+
+
+    <h3> How should timelime be deployed? </h3>
+
+    Timelime should not be used like a centralized website like reddit. But from different communities, similar to wikis (e.g. Word of Warcraft wiki is specialized on WoW information, whereas the Path of Exile wiki is about PoE).
+
+
+    <h3> What is the endgoal? </h3>
+
+    I imagine Timelines about specific topics, for example "Port Scanning" or "Supersymmetry". These contain all important links to the corresponding information about this topic. As it is indexed by release date and annotated by quality and relevancy, a reader is able to quickly gain an overview of the topic, its research history, and current news.
+
+    Also it is possible to create topics about speficic, non-scientific topics, like all news about Half Life 3.
 
 </div>

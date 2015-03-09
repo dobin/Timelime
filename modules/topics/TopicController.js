@@ -6,12 +6,19 @@ angular.module('myApp.topics', ['ngRoute'])
 		title : 'Topics',
 		templateUrl : 'modules/topics/topics.html',
 		controller : 'topicListCtrl'
-    });
-    $routeProvider.when('/edit-topic/:userID/:topicID', {
+    })
+    .when('/edit-topic/:userID/:topicID', {
         title : 'Topics',
         templateUrl : 'modules/topics/edit-topic.html',
         controller : 'topicEditCtrl'
-    });
+    })
+    .when('/add-topic', {
+        title : 'Topics',
+        templateUrl : 'modules/topics/edit-topic.html',
+        controller : 'topicEditCtrl'
+    })
+    ;
+
 }])
 
 

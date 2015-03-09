@@ -30,11 +30,10 @@
         </div>
 
         <div class= "form-group" ng-class="{error: myForm.topic_url.$invalid}">
-            <div class= "col-md-2"> URL </div>
+            <div class= "col-md-2"> Description </div>
 
             <div class="col-md-8">
-                <input name="topic_url" ng-model="topic.description" type= "text" class= "form-control" placeholder="Enter topic URL" required/>
-                <span ng-show="myForm.topic_url.$dirty && myForm.topic_url.$invalid" class="help-inline">URL Required</span>
+                <input name="topic_url" ng-model="topic.description" type= "text" class= "form-control" placeholder="Short topic description" />
             </div>
 
             <div class="col-md-2">
