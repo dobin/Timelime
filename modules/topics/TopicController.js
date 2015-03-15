@@ -16,11 +16,8 @@ angular.module('myApp.topics', ['ngRoute'])
         title : 'Topics',
         templateUrl : 'modules/topics/edit-topic.html',
         controller : 'topicEditCtrl'
-    })
-    ;
-
+    });
 }])
-
 
 
 .controller('topicListCtrl', function($scope, TopicServices, AuthenticationService) {

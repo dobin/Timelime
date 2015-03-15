@@ -12,9 +12,13 @@ angular.module('myApp.links')
             var readStats = ReadstatusService.getReadstatusTextFor(link.readStatus);
             link.readStatusTextRo = readStats;
 
-            link.dateAdded = new Date(link.dateAdded);
+
+            console.log(link.dateAdded);
+            link.dateAdded = new Date(link.dateAdded.sec * 1000);
+            console.log(link.dateAdded);
+
             if (link.datePublish != null) {
-                link.datePublish = new Date(link.datePublish);
+                link.datePublish = new Date(link.datePublish.sec * 1000);
             }
         }
 

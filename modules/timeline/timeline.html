@@ -52,7 +52,9 @@
         <table ng-table="tableParams" show-filter="true" class="table timelinetable">
             <tr ng-repeat="link in $data">
                 <td class="col-md-2" style="text-align:right" data-title="'DateAdded'" sortable="'dateAdded'" filter="{ 'Date': 'text' }">
-                    <span class="timelineTitleBig">{{link.dateAdded | date :dateFormat}} </span><br>
+                    <span class="timelineTitleBig">
+                        {{link.dateAdded | date :dateFormat}}
+                    </span><br>
 
                     {{link.topic.topicName}}
 
