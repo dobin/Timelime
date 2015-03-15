@@ -78,9 +78,13 @@
                     <br>
 
 
-                    <div ng-if="link.datePublish">
+                    <span ng-if="link.datePublish">
                         Published: {{link.datePublish | date :'dd.MM.yyyy'}}
-                    </div>
+                    </span>
+
+                    <span ng-if="link.rating">
+                        &nbsp; <rating value="link.rating" max="5" readonly="'true'"></rating>
+                    </span>
 
                     <br>
                     <span ng-if="link.linkID == selectedLink.linkID">

@@ -6,6 +6,7 @@ var app = angular.module('myApp', [
 	'ngTagsInput',
     'ngSanitize',
     'ui.select',
+    'ui.bootstrap',
 	'myApp.Authentication', 
 	'myApp.Home',
 	'myApp.timeline',
