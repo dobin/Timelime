@@ -172,6 +172,10 @@ angular.module('myApp.links', ['ngRoute'])
                 $scope.topics = data;
             });
         };
+
+        $scope.setPublishToToday = function() {
+            $scope.link.datePublish = new Date();
+        }
     })
 
     .controller('linkAddCtrl', function($scope, $rootScope, $location, $routeParams, services, link, topics, formats, AuthenticationService, TopicServices, ReadstatusService) {

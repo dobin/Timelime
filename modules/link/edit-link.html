@@ -47,8 +47,6 @@
                 <span ng-show="myForm.format_id.$dirty && myForm.format_id.$invalid" class="help-inline">Format Required</span>
             </div>
 
-
-
             <div class="col-md-2" ng-if="linkURLexists">
                 &nbsp
             </div>
@@ -58,9 +56,6 @@
             <div class="col-md-8" ng-if="linkURLexists">
                 URL already exists: <a ng-href="#/edit-link/{{linkURLexists.linkID}}">ID {{linkURLexists.linkID}} in {{linkURLexists.topicName}}</a>
             </div>
-
-
-
         </div>
 
         <div class= "form-group">
@@ -73,6 +68,7 @@
 
             <div class="col-md-7">
                 <button ng-click="setPublishToToday()">Today</button>
+                <button ng-click="asdf()">asdf</button>
             </div>
         </div>
 

@@ -418,7 +418,9 @@ class API extends REST {
 
         // Dates
         $link['dateAdded'] =  new MongoDate();
-        $link['datePublish'] = new MongoDate(strtotime($link['datePublish']));
+        if(isset($link['datePublish'])) {
+            $link['datePublish'] = new MongoDate(strtotime($link['datePublish']));
+        }
 
         // Resolve: userName
         $link['user']['userID'] = $this->getTokenUserID();
@@ -491,9 +493,10 @@ class API extends REST {
 		}
 */
         // Dates
-        $link['dateAdded'] =  new MongoDate(strtotime($link['datePublish']));
-        $link['datePublish'] = new MongoDate(strtotime($link['datePublish']));
-
+        $link['dateAdded'] =  new MongoDate(strtotime($link['dateAdded']));
+        if(isset($link['datePublish'])) {
+            $link['datePublish'] = new MongoDate(strtotime($link['datePublish']));
+        }
         $mongoLinks = $this->mongoDB->selectCollection('links');
         $searchArr = array('linkID' => $link['linkID']);
         $mongoLinks->update($searchArr, $link);
