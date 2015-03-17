@@ -5,13 +5,7 @@ include_once ("Authentication/JWT.php");
 require_once ("Rest.inc.php");
 
 class API extends REST {
-
 	public $data = "";
-
-	const DB_SERVER = "127.0.0.1";
-	const DB_USER = "root";
-	const DB_PASSWORD = "lilo";
-	const DB = "timelime";
 	const TOKEN_KEY = "test";
 
 	private $db = NULL;
@@ -22,133 +16,14 @@ class API extends REST {
 
 		date_default_timezone_set('Europe/Zurich');
 		$this -> dbConnect();
-		// Initiate Database connection
 	}
-
-/*
-    private function initMongo() {
-        $out = "Init dä möngi\n";
-
-        $mongoUsers = $this->mongoDB->users;
-        $mongoUsers->drop();
-        $users = [];
-        $userT = [];
-        $query = "SELECT * FROM users";
-        $r = $this -> mysqli -> query($query) or die($this -> mysqli -> error . __LINE__);
-  		if ($r -> num_rows > 0) {
-	        while ($user = $r -> fetch_assoc()) {
-	            $uid = $user['userID'];
-	            //unset($user['userID']);
-	            $mongoID = new MongoID();
-	            $mID = $mongoID->{'$id'};
-	            $user['userID'] = $mID;
-	            $user['_id'] = $mID;
-                $mongoUsers->insert($user);
-                $userT[ $uid ] = $user['_id'];
-
-   	            $users[] = $user;
-	        }
-	    }
-	    $out .= $this->json($users) . "\n";
-
-        $mongoTopics = $this->mongoDB->topics;
-        $mongoTopics->drop();
-        $topics = [];
-        $topicT = [];
-        $query = "SELECT * FROM topics";
-        $r = $this -> mysqli -> query($query) or die($this -> mysqli -> error . __LINE__);
-  		if ($r -> num_rows > 0) {
-	        while ($topic = $r -> fetch_assoc()) {
-	            $tid = $topic['topicID'];
-
-	            //unset($topic['topicID']);
-	            $mongoID = new MongoID();
-	            $mID = $mongoID->{'$id'};
-	            $topic['topicID'] = $mID;
-	            $topic['_id'] = $mID;
-
-	            $topic['userID'] = $userT[ $topic['userID'] ];
-
-                $mongoTopics->insert($topic);
-                $topiT[ $tid ] = $topic['_id'];
-                $topics[] = $topic;
-	        }
-	    }
-	    $out .= "\n";
-	    $out .= $this->json($topics) . "\n";
-
-        $linkFormats = [];
-        $query = "SELECT * FROM linkFormats";
-        $r = $this -> mysqli -> query($query) or die($this -> mysqli -> error . __LINE__);
-        if ($r -> num_rows > 0) {
-            while ($linkFormat = $r -> fetch_assoc()) {
-                $linkFormats[] = $linkFormat;
-            }
-        }
-        $out .= "\n";
-        $out .= $this->json($linkFormats) . "\n";
-
-
-        $mongoLinks = $this->mongoDB->links;
-        $mongoLinks->drop();
-        $query = "SELECT c.linkID, c.linkName, c.linkURL, c.dateAdded, c.datePublish, c.topicID, c.formatID, t.topicName, l.formatName, c.tagsJSON, c.readStatus, c.userID, c.userPriv, u.userID, u.userName";
-        $query .= " FROM links c INNER JOIN topics t ON c.topicID = t.topicID INNER JOIN linkFormats l ON c.formatID = l.linkFormatID INNER JOIN users u ON u.userID = t.userID ";
-        $query .= "  ORDER BY c.linkID DESC";
-  	    $r = $this -> mysqli -> query($query) or die($this -> mysqli -> error . __LINE__);
-  	    $links = [];
-  		if ($r -> num_rows > 0) {
-	        while ($link = $r -> fetch_assoc()) {
-				// User
-                $link['userID'] = $userT[ $link['userID'] ];
-				$link['user'] = [
-				    'userName' => $link['userName'],
-				    'userID' => $link['userID'],
-				];
-				unset($link['userName']);
-				unset($link['userID']);
-
-				// Topic
-                $link['topicID'] = $topiT[ $link['topicID'] ];
-				$link['topic'] = [
-				    'topicName' => $link['topicName'],
-				    'topicID' => $link['topicID'],
-                    'topicPermissions' => $link['userPriv'],
-				];
-				unset($link['topicName']);
-				unset($link['topicID']);
-				unset($link['userPriv']);
-
-				// Format
-				$link['format'] = $link['formatName'];
-				unset($link['formatName']);
-				unset($link['formatID']);
-
-	            $mongoID = new MongoID();
-	            $mID = $mongoID->{'$id'};
-	            $link['linkID'] = $mID;
-	            $link['_id'] = $mID;
-
-                $links[] = $link;
-                $mongoLinks->insert($link);
-			}
-  		}
-        $out .= "\n";
-  		$out .= $this->json($links) . "\n";
-
-	    $this -> response($out, 200);
-    }
-*/
 
 
 	/*
 	 *  Connect to Database
 	 */
 	private function dbConnect() {
-		$this -> mysqli = new mysqli(self::DB_SERVER, self::DB_USER, self::DB_PASSWORD, self::DB);
-
 		$this->mongoCon = new MongoClient();
-
-//		$this->mongoCon = new Mongo("mongodb://localhost");
 		$this->mongoDB = $this->mongoCon->selectDB('timelime');
 	}
 
@@ -728,9 +603,80 @@ class API extends REST {
 		}
 	}
 
-}
 
-// Initiiate Library
+    public function rss() {
+        $response = "";
+
+        $mongolinks = $this->mongoDB->selectCollection('links');
+        $userID = $this->_request['userid'];
+
+
+        $topic = null;
+        $searchArr = array('user.userID' => $userID);
+        if (isset($this->_request['topicid'])) {
+            $topicID = $this->_request['topicid'];
+            $searchArr['topic.topicID'] = $topicID;
+
+            $mongotopics = $this->mongoDB->selectCollection('topics');
+            $topic = $mongotopics->findOne(array('topicID' => $topicID));
+        }
+
+        $mongousers = $this->mongoDB->selectCollection('users');
+        $user = $mongousers->findOne(array('userID' => $userID));
+
+        $links = $mongolinks->find($searchArr);
+        $links->sort(array('dateAdded' => 1));
+        $links->limit(20);
+
+        $response .= '<?xml version="1.0" encoding="UTF-8" ?>';
+        $response .= '<rss version="2.0">';
+        $response .= '<channel>';
+        $response .= '<title>';
+        $response .= 'Haking.ch: ' . $user['username'];
+        if (isset($topicID)) {
+            $response .= " / " . $topic['topicName'];
+        }
+        $response .= '</title>';
+        $response .= '<description> </description>';
+
+        foreach($links as $link) {
+            $response .= '<item>';
+
+            $response .= '<title>' . $link['linkName'] .'</title>';
+            $response .= '<link>' . $link['linkURL'] . '</link>';
+            $response .= '<guid>' . $link['linkID'] . '</guid>';
+            $response .= '<pubDate>' . $link['dateAdded'] . '</pubDate>';
+
+            $response .= '<description>';
+            $response .= "Title: " . $link['linkName'] . "&lt;br&gt;";
+            $response .= "Topic: " . $link['topic']['topicName'] . "&lt;br&gt;";
+
+            if (isset($link['tags'])) {
+                $a = array();
+                foreach($link['tags'] as $tag) {
+                    $a[] = $tag['text'];
+                }
+                $response .= "Tags: " . join(",", $a) . "&lt;br&gt;";
+            }
+
+            if (isset($link['description'])) {
+                $response .= "Description: " . $link['description'] . "&lt;br&gt;";
+            }
+            $response .= "URL: &lt;a href=\"" . $link['linkURL'] . "\"&gt;" . $link['linkURL'] . "&lt;/a&gt;" . "&lt;br&gt;";
+            $response .= "Haking URL: &lt;a href=\"http://www.haking.ch/" . $link['user']['userID'] . "/" . $link['linkID'] . "\"&gt;" . "http://www.haking.ch/" . $link['user']['userID'] . "/" . $link['linkID'] . "&lt;/a&gt;";
+            $response .= "&lt;br&gt;";
+            $response .= '</description>';
+
+            $response .= '</item>';
+
+        }
+        $response .= '</channel>';
+        $response .= '</rss>';
+
+
+        $this->response($response, 200);
+    }
+}
 
 $api = new API;
 $api -> processApi();

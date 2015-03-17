@@ -30,25 +30,21 @@
             </ui-select-choices>
         </ui-select>
     </div>
-</div>
+
+    <div class="col-md-4" ng-show="!isMy">
+        <p class="navbar-text" ng-show="selectedUser">
+            User: {{selectedUser.username}}
+        </p>
+        <p class="navbar-text" ng-show="selectedUser">
+            <a href="/services/rss?userid={{selectedUser.userID}}">UserRSS</a>
+        </p>
+        <p class="navbar-text" ng-show="topic.selected">
+            <a href="/services/rss?userid={{selectedUser.userID}}&topicid={{topic.selected.topicID}}">TopicRSS</a>
+        </p>
+    </div>
 
 <div class="row">
     <div class="col-md-12" ng-show="links.length > 0">
-
-        <nav class= "navbar-left navbar-form" role= "navigation" >
-            <div ng-show="!isMy">
-                <div class= "navbar-header" >
-                    <p class="navbar-text" ng-show="selectedUser">
-                        User: {{selectedUser.username}}
-                    </p>
-                    <p class="navbar-text" ng-show="selectedTopic">
-                        Topic: {{selectedTopic.topicName}}
-                    </p>
-                </div>
-            </div>
-        </nav>
-
-
         <table ng-table="tableParams" show-filter="true" class="table timelinetable">
             <tr ng-repeat="link in $data">
                 <td class="col-md-2" style="text-align:right" data-title="'DateAdded'" sortable="'dateAdded'" filter="{ 'Date': 'text' }">
