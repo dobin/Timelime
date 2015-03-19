@@ -1,0 +1,18 @@
+# Timelime
+
+## Installation
+
+install stuff:
+apt-get install php5-json
+apt-get install php5-mongo
+
+edit in apache.conf for the timelime directory:
+AllowOverride All
+
+Configure Apache:
+a2enmod rewrite
+
+service apache2 restart
+
+
+
