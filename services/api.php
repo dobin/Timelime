@@ -80,41 +80,6 @@ class API extends REST {
 	}
 
 
-    public function updateDates() {
-        $mongoLinks = $this->mongoDB->selectCollection('links');
-        $searchArr = array();
-        $linksCursor = $mongoLinks->find($searchArr);
-
-        error_log("HMM");
-
-        $links = array();
-        foreach($linksCursor as $link) {
-
-            error_log("YES: " + $link['linkID']);
-
-            $searchArrLinks = array(
-                'linkID' => $link['linkID']
-            );
-
-            $link['dateAdded'] = new MongoDate(strtotime($link['dateAdded']));
-            $mongoLinks->update(
-                $searchArrLinks,
-                array('$set' => array('dateAdded' => $link['dateAdded'])),
-                array( 'multiple' => false )
-             );
-
-            if (isset($link['datePublish'])) {
-                $link['datePublish'] = new MongoDate(strtotime($link['datePublish']));
-
-                $mongoLinks->update(
-                    $searchArrLinks,
-                    array('$set' => array('datePublish' => $link['datePublish'])),
-                    array( 'multiple' => false )
-                 );
-            }
-        }
-    }
-
 	private function getAuthenticationHeader() {
 	    $token = "";
         $headers = getallheaders();
@@ -149,14 +114,13 @@ class API extends REST {
 	/***
 	* Links
 	*
-	* Privs:
-	*   userID = USERID
-	*xxx   link.topic.userPriv = 0 (public)
 	***/
 	private function links() {
 		if ($this -> get_request_method() != "GET") {
 			$this -> response('', 406);
 		}
+
+        $authUserID = $this->getTokenUSerID();
 
 		$userID = NULL;
         if (isset($this->_request['userID'])) {
@@ -170,6 +134,31 @@ class API extends REST {
 
         $mongoLinks = $this->mongoDB->selectCollection('links');
         $searchArr = array();
+
+        // Search for topic?
+        if (! is_null($topicID)) {
+            $searchArr['topic.topicID'] = $topicID;
+        }
+
+        // Search for user?
+        if (! is_null($userID)) {
+            $searchArr['user.userID'] = $userID;
+        }
+
+        // Only public?
+        if (! isset($authUserID)) {
+            $searchArr['topic.topicPermissions'] = '0';
+        } else {
+            $searchArr['$or'] = array(
+             array( 'topic.topicPermissions' => 0),
+             array( 'user.userID' => $authUserID));
+        }
+
+        error_log("AuthUserID: " . $authUserID);
+        error_log("UserID: " . $userID);
+        error_log(json_encode($searchArr));
+
+/*
         if (! is_null($topicID)) {
             if (! is_null($userID)) {
                 $searchArr = array('user.userID' => $userID, 'topicID' => $topicID);
@@ -182,7 +171,7 @@ class API extends REST {
             } else {
 
             }
-        }
+        }*/
         $linksCursor = $mongoLinks->find($searchArr);
 
         $links = array();
@@ -495,10 +484,8 @@ class API extends REST {
             return;
 		}
 
-
         $mongoTopics = $this->mongoDB->selectCollection('topics');
         $searchArr = array('topicID' => $topic['topicID']);
-        // Rename all links containing this topic, if necessary
         $originalTopic = $mongoTopics->findOne($searchArr);
 
         // Edit topic in topics
@@ -511,6 +498,17 @@ class API extends REST {
             $mongoLinks->update(
                 $searchArrLinks,
                 array('$set' => array('topic.topicName' => $topic['topicName'])),
+                array( 'multiple' => true )
+             );
+        }
+
+        // Update permissions of links
+        if ($originalTopic['topicPermissions'] != $topic['topicPermissions']) {
+            $mongoLinks = $this->mongoDB->selectCollection('links');
+            $searchArrLinks = array('topic.topicID' => $topic['topicID']);
+            $mongoLinks->update(
+                $searchArrLinks,
+                array('$set' => array('topic.topicPermissions' => $topic['topicPermissions'])),
                 array( 'multiple' => true )
              );
         }

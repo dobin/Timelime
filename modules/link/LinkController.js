@@ -156,8 +156,7 @@ angular.module('myApp.links', ['ngRoute'])
                 var t = {
                     topicName: $scope.newTopic,
                     description: "",
-                    userID: AuthenticationService.getCurrentUserID,
-                    userPriv: 0};
+                    userID: AuthenticationService.getCurrentUserID};
                 TopicServices.insertTopic(t).then(function(data) {
                     $scope.reloadTopics();
                     $scope.link.topicID = data.data.topicID.toString();
@@ -193,7 +192,6 @@ angular.module('myApp.links', ['ngRoute'])
         $scope.link.readStatus = '0';
         $scope.link.readStatusInitial = '0';
         $scope.link.user = {
-            userPriv: '0'
         };
         $scope.link.format = "website";
         $scope.link.topic = {};
@@ -263,8 +261,7 @@ angular.module('myApp.links', ['ngRoute'])
                 var t = {
                     topicName: $scope.newTopic,
                     description: "",
-                    userID: AuthenticationService.getCurrentUserID,
-                    userPriv: 0};
+                    userID: AuthenticationService.getCurrentUserID };
                 TopicServices.insertTopic(t).then(function(data) {
                     $scope.reloadTopics();
                     $scope.link.topic.topicID = data.data.topicID;
