@@ -113,7 +113,6 @@ class API extends REST {
 
 	/***
 	* Links
-	*
 	***/
 	private function links() {
 		if ($this -> get_request_method() != "GET") {
@@ -154,24 +153,6 @@ class API extends REST {
              array( 'user.userID' => $authUserID));
         }
 
-        error_log("AuthUserID: " . $authUserID);
-        error_log("UserID: " . $userID);
-        error_log(json_encode($searchArr));
-
-/*
-        if (! is_null($topicID)) {
-            if (! is_null($userID)) {
-                $searchArr = array('user.userID' => $userID, 'topicID' => $topicID);
-            } else {
-                $searchArr = array('topic.topicID' => $topicID);
-            }
-        } else {
-            if (! is_null($userID)) {
-                $searchArr = array('user.userID' => $userID);
-            } else {
-
-            }
-        }*/
         $linksCursor = $mongoLinks->find($searchArr);
 
         $links = array();
@@ -179,7 +160,11 @@ class API extends REST {
             $links[] = $link;
         }
 
-		$this->response($this->json($links), 200);
+        if ($links) {
+		    $this->response($this->json($links), 200);
+        } else {
+		    $this->response('', 204);
+        }
 	}
 
 
@@ -205,7 +190,6 @@ class API extends REST {
             $this -> response($this->json($link), 200);
         } else {
             $this -> response('', 204);
-
         }
    	}
 
@@ -213,26 +197,30 @@ class API extends REST {
 
 	/***
 	* Link
-	*
-	* Privs:
-	*   userID = USERID
-	*xxx   link.topic.userPriv = 0 (public)
 	***/
 	private function link() {
 		if ($this -> get_request_method() != "GET") {
 			$this -> response('', 406);
 		}
 
+        $mongoLinks = $this->mongoDB->selectCollection('links');
+
         $userID = NULL;
         $id = NULL;
         $query = NULL;
 
-        // UserID
-        $userID = $this->getTokenUSerID();
+        $authUserID = $this->getTokenUSerID();
         $linkID = $this -> _request['id'];
 
-        $mongoLinks = $this->mongoDB->selectCollection('links');
         $searchArr = array('linkID' => $linkID);
+        if (! isset($authUserID)) {
+            $searchArr['topic.topicPermissions'] = '0';
+        } else {
+            $searchArr['$or'] = array(
+             array( 'topic.topicPermissions' => 0),
+             array( 'user.userID' => $authUserID));
+        }
+
         $link = $mongoLinks->findOne($searchArr);
 
         if ($link) {
@@ -249,18 +237,14 @@ class API extends REST {
         return $user['username'];
     }
 
-    private function getTopicnameFor($topicID) {
+    private function getTopicFor($topicID) {
         $mongoTopics = $this->mongoDB->selectCollection('topics');
         $topic = $mongoTopics->findOne(array('topicID' => $topicID));
-        return $topic['topicName'];
+        return $topic;
     }
 
 	/***
 	* Insert Link
-	*
-	* Privs:
-	*   logged in
-	*
 	***/
 	private function insertLink() {
 		if ($this -> get_request_method() != "POST") {
@@ -268,6 +252,11 @@ class API extends REST {
 		}
 
         $userID = $this->getTokenUserID();
+        if (! isset($userID)) {
+            $this -> response('', 401);
+            return;
+        }
+
       	$link = json_decode(file_get_contents("php://input"), true);
 
         $link['readStatusInitial'] = $link['readStatus'];
@@ -291,12 +280,16 @@ class API extends REST {
         $link['user']['userName'] = $this->getUsernameFor( $link['user']['userID']);
 
         // Resolve: topicName
-        $link['topic']['topicName'] = $this->getTopicnameFor( $link['topic']['topicID']);
+        $topic = $this->getTopicFor( $link['topic']['topicID']);
+        if ($topic['userID'] != $userID ) {
+            $this -> response('', 401);
+            return;
+        }
+        $link['topic']['topicName'] = $topic['topicName'];
 
 
         $mongoLinks->insert($link);
         if (false) {
-            error_log("NOPE");
 			$this -> response('', 204);
         } else {
    			$success = array('status' => "Success", "msg" => "Link Created Successfully.", "data" => $link);
@@ -341,8 +334,8 @@ class API extends REST {
 			$this -> response('', 406);
 		}
 
-        $userID = $this->getTokenUSerID();
-        if (is_null($userID)) {
+        $userID = $this->getTokenUserID();
+        if (! isset($userID)) {
 			$this -> response('', 401);
             return;
         }
@@ -351,11 +344,11 @@ class API extends REST {
 		$link = $link2['link'];
 		$id = $link['linkID'];
 
-/*		if (! $this->canWriteLink($userID, $id)) {
+		if (! $this->canWriteLink($userID, $id)) {
 			$this -> response('', 401);
             return;
 		}
-*/
+
         // Dates
         $link['dateAdded'] =  new MongoDate(strtotime($link['dateAdded']));
         if(isset($link['datePublish'])) {
@@ -366,7 +359,6 @@ class API extends REST {
         $mongoLinks->update($searchArr, $link);
 
         if (false) {
-            error_log("NOPE");
 			$this -> response('', 204);
         } else {
    			$success = array('status' => "Success", "msg" => "Link Created Successfully.", "data" => $link);
@@ -398,21 +390,38 @@ class API extends REST {
         $mongoLinks->remove($searchArr);
 	}
 
+
+
 	/*** Topics ***/
 	private function topics() {
 		if ($this -> get_request_method() != "GET") {
 			$this -> response('', 406);
 		}
 
+        $authUserID = $this->getTokenUSerID();
         $mongoTopics = $this->mongoDB->selectCollection('topics');
 
         $searchArr = array();
+        if (! isset($authUserID)) {
+            $searchArr['topicPermissions'] = '0';
+        } else {
+            $searchArr['$or'] = array(
+             array( 'topicPermissions' => 0),
+             array( 'userID' => $authUserID));
+        }
+
         $topicsCursor = $mongoTopics->find($searchArr);
+
         $topics = array();
         foreach($topicsCursor as $topic) {
             $topics[] = $topic;
         }
-        $this->response($this->json($topics), 200);
+
+        if ($topics) {
+            $this->response($this->json($topics), 200);
+        } else {
+            $this->response('', 204);
+        }
 	}
 
     private function topicsForUser() {
@@ -420,16 +429,31 @@ class API extends REST {
             $this -> response('', 406);
         }
 
+        $authUserID = $this->getTokenUSerID();
+
         $userID = $this -> _request['userID'];
         $mongoTopics = $this->mongoDB->selectCollection('topics');
 
         $searchArr = array('userID' => $userID);
+        if (! isset($authUserID)) {
+            $searchArr['topicPermissions'] = '0';
+        } else {
+            $searchArr['$or'] = array(
+             array( 'topicPermissions' => 0),
+             array( 'userID' => $authUserID));
+        }
+
         $topicsCursor = $mongoTopics->find($searchArr);
         $topics = array();
         foreach($topicsCursor as $topic) {
             $topics[] = $topic;
         }
-        $this->response($this->json($topics), 200);
+
+        if ($topics) {
+            $this->response($this->json($topics), 200);
+        } else {
+		    $this->response('', 204);
+        }
     }
 
     private function topic() {
@@ -437,17 +461,25 @@ class API extends REST {
             $this -> response('', 406);
         }
 
-        $userID = NULL;
+        $authUserID = NULL;
         $id = NULL;
         $query = NULL;
 
         // UserID
-        $userID = $this->getTokenUSerID();
+        $authUserID = $this->getTokenUSerID();
 
         $topicID = $this->_request['id'];
 
         $mongoTopics = $this->mongoDB->selectCollection('topics');
         $searchArr = array('topicID' => $topicID);
+        if (! isset($authUserID)) {
+            $searchArr['topicPermissions'] = '0';
+        } else {
+            $searchArr['$or'] = array(
+             array( 'topicPermissions' => 0),
+             array( 'userID' => $authUserID));
+        }
+
         $topic = $mongoTopics->findOne($searchArr);
 
         if ($topic) {
@@ -457,20 +489,17 @@ class API extends REST {
         }
     }
 
+
 	/***
 	* Update Topic
-	*
-	* Privs:
-	*   userID = USERID
-	*xxx   link.topic.userPriv = 0 (public)
 	***/
 	private function updateTopic() {
 		if ($this -> get_request_method() != "POST") {
 			$this -> response('', 406);
 		}
 
-        $userID = $this->getTokenUserID();
-        if (is_null($userID)) {
+        $authUserID = $this->getTokenUserID();
+        if (is_null($authUserID)) {
 			$this -> response('', 401);
             return;
         }
@@ -479,7 +508,7 @@ class API extends REST {
 		$topic = $data['topic'];
 		$id = $data['id'];
 
-		if (! $this->canWriteTopic($userID, $id)) {
+		if (! $this->canWriteTopic($authUserID, $id)) {
 			$this -> response('', 401);
             return;
 		}
@@ -527,8 +556,8 @@ class API extends REST {
 		if ($this -> get_request_method() != "POST") {
 			$this -> response('', 406);
 		}
-        $userID = $this->getTokenUSerID();
-        if (is_null($userID)) {
+        $authUserID = $this->getTokenUSerID();
+        if (is_null($authUserID)) {
 			$this -> response('', 401);
             return;
         }
