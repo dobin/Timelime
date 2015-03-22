@@ -573,7 +573,6 @@ class API extends REST {
         $mongoTopics = $this->mongoDB->selectCollection('topics');
         $mongoTopics->insert($topic);
 
-
         if (false) {
 			$this -> response('', 204);
         } else {

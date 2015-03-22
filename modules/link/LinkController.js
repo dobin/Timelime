@@ -261,7 +261,7 @@ angular.module('myApp.links', ['ngRoute'])
                 var t = {
                     topicName: $scope.newTopic,
                     description: "",
-                    userID: AuthenticationService.getCurrentUserID };
+                    topicPermissions: "0" };
                 TopicServices.insertTopic(t).then(function(data) {
                     $scope.reloadTopics();
                     $scope.link.topic.topicID = data.data.topicID;
