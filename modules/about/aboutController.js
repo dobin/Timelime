@@ -9,7 +9,7 @@ angular.module('myApp.about', ['ngRoute'])
         })
     }])
 
-    .controller('aboutCtrl', function($scope, services) {
+    .controller('aboutCtrl', [ '$scope', 'services', function($scope, services) {
 
-    })
+    }])
 ;

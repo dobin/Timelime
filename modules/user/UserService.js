@@ -1,15 +1,6 @@
 'use strict';
 
-
-angular.module('myApp.User', ['ngRoute'])
-    .config(['$routeProvider', function($routeProvider) {
-        $routeProvider.when('/users', {
-            title : 'Users',
-            templateUrl : 'modules/user/user.html',
-            controller : 'UserListCtrl'
-        });
-    }])
-
+angular.module('myApp.User')
     .factory("UserService", ['$http',
         function($http) {
             var serviceBase = 'services/'
@@ -21,6 +12,15 @@ angular.module('myApp.User', ['ngRoute'])
             }
 
             return obj;
-        }])
+        }
+    ])
+
+    .config(['$routeProvider', function($routeProvider) {
+        $routeProvider.when('/user', {
+            title : 'User',
+            templateUrl : 'modules/user/user.html',
+            controller : 'UserViewCtrl'
+        });
+    }])
 
 ;

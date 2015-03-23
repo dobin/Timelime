@@ -2,8 +2,7 @@
 
 angular.module('myApp.topics')
 
- .factory("TopicServices", ['$http',
-     function($http) {
+ .factory("TopicServices", ['$http', function($http) {
      var serviceBase = 'services/'
      var obj = {};
 

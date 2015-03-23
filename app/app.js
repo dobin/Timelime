@@ -12,14 +12,10 @@ var app = angular.module('myApp', [
 	'myApp.timeline',
 	'myApp.topics', 
 	'myApp.links',
-	'myApp.tags',
     'myApp.Readstatus',
     'myApp.User',
     'myApp.about',
 	'ngCookies']);
-
-// declare modules - WHY
-angular.module('myApp.Authentication', []);
 
 app.run(['$location', '$rootScope', 'AuthenticationService', function($location, $rootScope, AuthenticationService) {
 	$rootScope.$on('$routeChangeSuccess', function(event, current, previous) {
