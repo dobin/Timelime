@@ -88,23 +88,8 @@ angular.module('myApp.timeline', ['ngRoute'])
             return filtered;
         }
     })
-    .filter('topicFilter', function($filter) {
-        return function(links, topicFilter, readStatusFilter) {
-            var filtered = [];
 
-            angular.forEach(links, function(link) {
-                if(topicFilter == null || link.topic.topicName === topicFilter.topicName) {
-                    if(readStatusFilter == null || link.readStatus === readStatusFilter.id) {
-                        filtered.push(link);
-                    }
-                }
-            });
-
-            return filtered;
-        }
-    })
-
-    .controller('timelineListCtrl', function($scope, $http, $routeParams, $filter, $location, data, services, ngTableParams, AuthenticationService, ReadstatusService, UserService, TopicServices, topics) {
+    .controller('timelineListCtrl', function($scope, $http, $routeParams, $filter, $location, data, services, ngTableParams, AuthenticationService, ReadstatusService, UserService, TopicServices, topics, Reddit) {
         var linkID = $routeParams.linkID;
         $scope.user = AuthenticationService.getCurrentUser();
 
@@ -118,6 +103,13 @@ angular.module('myApp.timeline', ['ngRoute'])
 
         var initialSearchStatus = $location.search().readStatus;
         $scope.readStat.selected = $scope.readStats[initialSearchStatus];
+
+
+        $scope.busy = false;
+        $scope.after = '';
+        $scope.items = [];
+
+        $scope.reddit = new Reddit();
 
         // Check if its ours
         var selectedUserID = $routeParams.userID;
@@ -157,63 +149,6 @@ angular.module('myApp.timeline', ['ngRoute'])
                 }
             }
         }
-
-        var data = data.data;
-        $scope.tableParams = new ngTableParams({
-            page: 1,            // show first page
-            count: 10,          // count per page
-
-/* Dont do initial filtering - slow as fuck
- filter: {
- name: ''       // initial filter
- },
- sorting: {
- name: 'asc'     // initial sorting
- }
- */
-             sorting: {
-                 dateAdded: 'desc'     // initial sorting
-             }
-        }, {
-            total: data.length, // length of data
-            getData: function($defer, params) {
-                var filters = params.filter();
-                var tempDateFilter;
-
-                var orderedData = params.sorting() ?
-                    $filter('orderBy')(data, params.orderBy()) :
-                    data;
-
-                if(filters) {
-                    if(filters.Date) {
-                        orderedData = $filter('customUserDateFilter')(orderedData, filters.Date);
-                        tempDateFilter = filters.Date;
-                        delete filters.Date;
-                    }
-                    orderedData = $filter('filter')(orderedData, filters);
-                    filters.Date = tempDateFilter;
-                }
-
-                //if($scope.topicFilter) {
-                    orderedData = $filter('topicFilter')(orderedData, $scope.topic.selected, $scope.readStat.selected);
-                //}
-                //if($scope.readStatusfilter) {
-                //    orderedData = $filter('topicFilter')(orderedData, $scope.topicFilter);
-                //}
-
-
-                // use build-in angular filter
-                /*var filteredData = params.filter() ?
-                    $filter('filter')(data, params.filter()) :
-                    data;
-                var orderedData = params.sorting() ?
-                    $filter('orderBy')(filteredData, params.orderBy()) :
-                    data;*/
-                params.total(orderedData.length); // set total for recalc pagination
-                $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
-            }
-        });
-
 
         $scope.reloadTable = function() {
             var path = "";
@@ -262,7 +197,55 @@ angular.module('myApp.timeline', ['ngRoute'])
             $scope.reloadTable();
         }
 
+
+        $scope.nextPage = function() {
+            if ($scope.busy) return;
+            $scope.busy = true;
+
+            services.getLinksAfter($scope.after).success(function (data) {
+                //console.log(data);
+                for (var i = 0; i < data.length; i++) {
+                    //this.items.push(items[i].data);
+                    $scope.items.push(data[i]);
+                }
+
+                console.log($scope.items);
+
+                $scope.after = $scope.items[$scope.items.length - 1].linkID;
+                $scope.busy = false;
+            });
+        }
     })
 
+.factory('Reddit', function($http, services) {
+        var Reddit = function() {
+            this.items = [];
+            this.busy = false;
+            this.after = '';
+        };
+
+        Reddit.prototype.nextPage = function() {
+            if (this.busy) return;
+            this.busy = true;
+
+            var url = "/timelime/services/links?after=" + this.after + "&jsonp=JSON_CALLBACK";
+            $http.jsonp(url).success(function(data) {
+                console.log(data);
+
+                var items = data.children;
+
+                var x;
+                for (var i = 0; i < items.length; i++) {
+                    x = items[i].dateAdded.sec;
+                    services.processLink(items[i]);
+                    this.items.push( items[i] );
+                }
+                this.after = x;
+                this.busy = false;
+            }.bind(this));
+        };
+
+        return Reddit;
+});
 ;
 

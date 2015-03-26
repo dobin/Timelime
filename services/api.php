@@ -131,6 +131,16 @@ class API extends REST {
             $topicID = $this -> _request['topicID'];
         }
 
+        $callback = NULL;
+        if (isset($this->_request['jsonp'])) {
+            $callback = $this -> _request['jsonp'];
+        }
+
+        $after = NULL;
+        if (isset($this->_request['after'])) {
+            $after = $this -> _request['after'];
+        }
+
         $mongoLinks = $this->mongoDB->selectCollection('links');
         $searchArr = array();
 
@@ -153,7 +163,14 @@ class API extends REST {
              array( 'user.userID' => $authUserID));
         }
 
+        // After?
+        if (isset($after) && $after != "") {
+            $after = new MongoDate($after);
+            $searchArr['dateAdded'] = array( '$lt' => $after);
+         }
+
         $linksCursor = $mongoLinks->find($searchArr);
+        $linksCursor->limit(10);
 
         $links = array();
         foreach($linksCursor as $link) {
@@ -161,7 +178,11 @@ class API extends REST {
         }
 
         if ($links) {
-		    $this->response($this->json($links), 200);
+            if (isset($callback)) {
+		        $this->response($callback . '({ "children": ' .  $this->json($links) . '})', 200);
+		    } else {
+		        $this->response($this->json($links), 200);
+		    }
         } else {
 		    $this->response('', 204);
         }

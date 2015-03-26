@@ -5,6 +5,7 @@ var app = angular.module('myApp', [
 	'ngTable',
 	'ngTagsInput',
     'ngSanitize',
+    'infinite-scroll',
     'ui.select',
     'ui.bootstrap',
 	'myApp.Authentication', 

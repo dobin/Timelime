@@ -19,6 +19,32 @@ angular.module('myApp.links')
             }
         }
 
+        obj.processLink = function(link) {
+            // Readstats
+            var readStats = ReadstatusService.getReadstatusTextFor(link.readStatus);
+            link.readStatusTextRo = readStats;
+
+            // Dates
+            link.dateAdded = new Date(link.dateAdded.sec * 1000);
+            if (link.datePublish != null) {
+                link.datePublish = new Date(link.datePublish.sec * 1000);
+            }
+        }
+
+
+        obj.getLinksAfter = function(after) {
+            var links = $http.get(serviceBase + 'links?after=' + after);
+
+            links.success(function(linkss) {
+                //for(var link in linkss) {
+                for (var index=0; index<linkss.length; index++) {
+                    var link = linkss[index];
+                    processLink(link);
+                }
+            });
+
+            return links;
+        }
 
         obj.getLinks = function() {
             var links = $http.get(serviceBase + 'links');
