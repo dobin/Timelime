@@ -215,7 +215,8 @@ class API extends REST {
          }
 
         $linksCursor = $mongoLinks->find($searchArr);
-        $linksCursor->limit(10);
+        $linksCursor->sort(array('dateAdded' => -1));
+        $linksCursor->limit(25);
 
         $links = array();
         foreach($linksCursor as $link) {
@@ -352,7 +353,7 @@ class API extends REST {
             return;
         }
         $link['topic']['topicName'] = $topic['topicName'];
-
+        $link['topic']['topicPermissions'] = $topic['topicPermissions'];
 
         $mongoLinks->insert($link);
         if (false) {
