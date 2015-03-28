@@ -90,7 +90,6 @@ angular.module('myApp.timeline', ['ngRoute'])
     })
 
     .controller('timelineListCtrl', function($scope, $http, $routeParams, $filter, $location, data, services, ngTableParams, AuthenticationService, ReadstatusService, UserService, TopicServices, topics, Reddit) {
-        var linkID = $routeParams.linkID;
         $scope.user = AuthenticationService.getCurrentUser();
 
         $scope.links = data.data;
@@ -100,16 +99,23 @@ angular.module('myApp.timeline', ['ngRoute'])
         // For topic search
         $scope.topic = {};
         $scope.readStat = {};
+        $scope.filter = {
+            tags: '',
+            search: ''
+        };
 
+        $scope.reddit = new Reddit();
+
+        // Readstatus
         var initialSearchStatus = $location.search().readStatus;
         $scope.readStat.selected = $scope.readStats[initialSearchStatus];
 
+        // Search
+        $scope.filter.search = $location.search().search;
 
-        $scope.busy = false;
-        $scope.after = '';
-        $scope.items = [];
+        // tags
+        $scope.filter.tags = $location.search().tags;
 
-        $scope.reddit = new Reddit();
 
         // Check if its ours
         var selectedUserID = $routeParams.userID;
@@ -135,17 +141,13 @@ angular.module('myApp.timeline', ['ngRoute'])
             $scope.topic.selected = found[0];
         }
 
-        // Check if a link is selected
+        // Check if a link is selected (details)
+        var linkID = $routeParams.linkID;
         if (linkID) {
-            /*
-             var linkParam = $filter('filter')($scope.links, function (d) {
-             return d.linkID == linkID;
-             })[0];*/
             for(var i=0; i<$scope.links.length; i++) {
                 if (angular.equals($scope.links[i].linkID, linkID)) {
                     $scope.selectedLink = $scope.links[i];
                     $scope.links[i].isSelected = true;
-                    ///$scope.viewLink(links[i]);
                 }
             }
         }
@@ -163,10 +165,32 @@ angular.module('myApp.timeline', ['ngRoute'])
             if ($scope.readStat != null && $scope.readStat.selected != null) {
                 $location.path(path).search('readStatus', $scope.readStat.selected.id);
             } else {
-                $location.path(path).search('');
+                $location.path(path).search('readStatus', '');
             }
 
-            $scope.tableParams.reload();
+            if ($scope.filter.search != null && $scope.filter.search != "") {
+                $location.path(path).search('search', $scope.filter.search);
+            } else {
+                $location.path(path).search('search', '');
+            }
+
+            if ($scope.filter.tags != null && $scope.filter.tags != "") {
+                $location.path(path).search('tags', $scope.filter.tags);
+            } else {
+                $location.path(path).search('tags', '');
+            }
+
+            console.log("ReloadTable");
+            // Copy all search things
+            //console.log($scope.topic);
+            //console.log($scope.readStat.selected);
+
+            //$scope.reddit.sett("aa");
+            //$scope.reddit.search.topic = $scope.topic.selected.topicID;
+            //$scope.reddit.search.readstatus = $scope.readStat.selected.id;
+            //$scope.reddit.search.tags = $scope.tags;
+
+            //$scope.tableParams.reload();
         }
 
 
@@ -196,25 +220,6 @@ angular.module('myApp.timeline', ['ngRoute'])
             $scope.topic.selected = undefined;
             $scope.reloadTable();
         }
-
-
-        $scope.nextPage = function() {
-            if ($scope.busy) return;
-            $scope.busy = true;
-
-            services.getLinksAfter($scope.after).success(function (data) {
-                //console.log(data);
-                for (var i = 0; i < data.length; i++) {
-                    //this.items.push(items[i].data);
-                    $scope.items.push(data[i]);
-                }
-
-                console.log($scope.items);
-
-                $scope.after = $scope.items[$scope.items.length - 1].linkID;
-                $scope.busy = false;
-            });
-        }
     })
 
 .factory('Reddit', function($http, services) {
@@ -222,27 +227,56 @@ angular.module('myApp.timeline', ['ngRoute'])
             this.items = [];
             this.busy = false;
             this.after = '';
+            this.shit = 'S1';
+
+            this.search = {
+                topic: '',
+                readStatus: '',
+                tags: []
+            };
         };
 
-        Reddit.prototype.nextPage = function() {
-            if (this.busy) return;
-            this.busy = true;
+        Reddit.prototype = {
+            nextPage: function (topic, readStat, tags, search) {
+                if (this.busy) return;
+                this.busy = true;
 
-            var url = "/timelime/services/links?after=" + this.after + "&jsonp=JSON_CALLBACK";
-            $http.jsonp(url).success(function(data) {
-                console.log(data);
+                var topicID = '';
+                var readStatID = '';
 
-                var items = data.children;
-
-                var x;
-                for (var i = 0; i < items.length; i++) {
-                    x = items[i].dateAdded.sec;
-                    services.processLink(items[i]);
-                    this.items.push( items[i] );
+                if (topic.selected) {
+                    topicID = topic.selected.topicID;
                 }
-                this.after = x;
-                this.busy = false;
-            }.bind(this));
+                if (readStat.selected) {
+                    readStatID = readStat.selected.id;
+                }
+
+
+                console.log("NextPage()");
+
+                var url = "/timelime/services/links?"
+                    + "after=" + this.after
+                    + "&topic=" + topicID
+                    + "&readStatus=" + readStatID
+                    + "&tags=" + tags
+                    + "&search=" + search
+                    + "&jsonp=JSON_CALLBACK";
+
+                console.log("URL: " + url);
+
+                $http.jsonp(url).success(function (data) {
+                    var items = data.children;
+
+                    var x;
+                    for (var i = 0; i < items.length; i++) {
+                        x = items[i].dateAdded.sec;
+                        services.processLink(items[i]);
+                        this.items.push(items[i]);
+                    }
+                    this.after = x;
+                    this.busy = false;
+                }.bind(this));
+            }
         };
 
         return Reddit;

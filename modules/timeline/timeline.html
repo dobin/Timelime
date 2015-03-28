@@ -3,9 +3,17 @@
 </style>
 
 <div ng-show="selectedUser" class="row">
-    <div  class="col-md-4">
+    <div class="col-md-3">
+        <input type="text" class="form-control" id="b" name="filterSearch" ng-model="filter.search" ng-blur="reloadTable()" placeholder="Search in title">
+    </div>
+    <div class="col-md-3">
+        <input type="text" class="form-control" id="a" name="filterTags" ng-model="filter.tags" ng-blur="reloadTable()" placeholder="Tags (comma seperated)">
+
+    </div>
+
+    <div  class="col-md-3">
         <ui-select ng-change="reloadTable()" ng-model="topic.selected"  ng-disabled="disabled" style="min-width: 200px;" title="Choose a topic">
-            <ui-select-match allow-clear placeholder="Select a topic in the list or search...">{{$select.selected.topicName}}</ui-select-match>
+            <ui-select-match allow-clear placeholder="Select a topic in the list or search">{{$select.selected.topicName}}</ui-select-match>
             <ui-select-choices repeat="topic in topics | propsFilter: {topicName: $select.search}">
                 <div ng-bind-html="topic.parentTopic.topicName + ' / ' + topic.topicName | highlight: $select.search"></div>
                 <small>
@@ -22,7 +30,7 @@
                 ng-change="reloadTable()"
                 ng-model="readStat.selected"
                 ng-disabled="disabled"
-                style="min-width: 200px;"
+
                 title="Choose a topic">
             <ui-select-match allow-clear placeholder="Select a readstatus">{{$select.selected.text}}</ui-select-match>
             <ui-select-choices repeat="readStat in readStats">
@@ -30,16 +38,6 @@
             </ui-select-choices>
         </ui-select>
     </div>
-
-    <div class="col-md-3">
-        Tags: <input ng-model="topicFilter.tags" ng-blur="reloadTable"></input>
-    </div>
-    <div class="col-md-3">
-        Search: <input ng-model="topicFilter.topicName" ng-blur="reloadTable"></input>
-    </div>
-
-
-
         <div class="col-md-4" ng-show="!isMy">
         <p class="navbar-text" ng-show="selectedUser">
             User: {{selectedUser.username}}
@@ -53,7 +51,9 @@
     </div>
 </div>
 
-
+<div class="row"> &nbsp;
+</div>
+<div class="row">
 
 <div class="row">
     <div class="col-md-12" ng-show="links.length == 0">
@@ -63,7 +63,7 @@
     </div>
 
 
-    <div infinite-scroll='reddit.nextPage()' infinite-scroll-disabled='reddit.busy' infinite-scroll-distance='0'>
+    <div infinite-scroll='reddit.nextPage(topic, readStat, filter.tags, filter.search)' infinite-scroll-disabled='reddit.busy' infinite-scroll-distance='0'>
         <table class="table timelinetable">
         <tr ng-repeat='link in reddit.items'>
             <td class="col-md-2" style="text-align:right" data-title="'DateAdded'" sortable="'dateAdded'" filter="{ 'Date': 'text' }">

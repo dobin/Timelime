@@ -78,11 +78,35 @@ class API extends REST {
 		    $this -> response($this -> json($error), 401);
 		}
 	}
+/*
+	public function fixTags() {
+        $mongoLinks = $this->mongoDB->selectCollection('links');
+        $searchArr = array();
+        $linksCursor = $mongoLinks->find($searchArr);
+
+        foreach($linksCursor as $link) {
+            $newtags = array();
+
+            if (array_key_exists('tags', $link)) {
+
+                foreach($link['tags'] as $tag) {
+                    $newtags[] = $tag['text'];
+
+                }
+                //unlink($link['tags']);
+
+                $link['tags'] = $newtags;
+
+                $mongoLinks->update(array('linkID' => $link['linkID']), $link);
+            }
+        }
+	}*/
 
 
 	private function getAuthenticationHeader() {
 	    $token = "";
         $headers = getallheaders();
+
         foreach($headers as $key=>$val){
             if($key === "Authorization") {
                 $token = $val;
@@ -97,14 +121,11 @@ class API extends REST {
 
         $token = $this->getAuthenticationHeader();
 
-
         try {
     	    $jwtToken = JWT::decode($token, "test");
-
             $userID = $jwtToken->userID;
-            error_log("UserID: " . $userID);
         } catch (Exception $e) {
-            error_log( 'Caught exception: '.  $e->getMessage() . "\n");
+            //error_log( 'Caught exception: '.  $e->getMessage() . "\n");
         }
 
         return $userID;
@@ -126,11 +147,6 @@ class API extends REST {
             $userID = $this -> _request['userID'];
         }
 
-        $topicID = NULL;
-        if (isset($this->_request['topicID'])) {
-            $topicID = $this -> _request['topicID'];
-        }
-
         $callback = NULL;
         if (isset($this->_request['jsonp'])) {
             $callback = $this -> _request['jsonp'];
@@ -139,6 +155,21 @@ class API extends REST {
         $after = NULL;
         if (isset($this->_request['after'])) {
             $after = $this -> _request['after'];
+        }
+
+        $topicID = NULL;
+        if (isset($this->_request['topic']) && $this->_request['topic'] != '') {
+            $topicID = $this -> _request['topic'];
+        }
+
+        $search = NULL;
+        if (isset($this->_request['search']) && $this->_request['search'] != '' && $this->_request['search'] != 'undefined') {
+            $search = $this -> _request['search'];
+        }
+
+        $tags = NULL;
+        if (isset($this->_request['tags']) && $this->_request['tags'] != '' && $this->_request['tags'] != 'undefined') {
+            $tags = urldecode($this -> _request['tags']);
         }
 
         $mongoLinks = $this->mongoDB->selectCollection('links');
@@ -162,6 +193,20 @@ class API extends REST {
              array( 'topic.topicPermissions' => 0),
              array( 'user.userID' => $authUserID));
         }
+
+        // searchfor?
+        if (! is_null($search)) {
+            $searchArr['linkName'] = array ('$regex' => new MongoRegex("/$search/"));
+        }
+
+        // Tags?
+        if (! is_null($tags)) {
+            $t = preg_split('/, /', $tags);
+            foreach($t as $tag) {
+                $searchArr['tags'] = array('$elemMatch' => array('text' =>  $tag));
+            }
+        }
+
 
         // After?
         if (isset($after) && $after != "") {
@@ -635,7 +680,6 @@ class API extends REST {
             'username' => $user['username'],
             'userID' => $user['userID'],
         );
-        error_log($this->json($publicUser));
 
         $this->response($this->json($publicUser), 200);
     }
