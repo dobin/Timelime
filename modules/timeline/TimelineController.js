@@ -8,9 +8,6 @@ angular.module('myApp.timeline', ['ngRoute'])
             templateUrl : 'modules/timeline/timeline.html',
             controller : 'timelineListCtrl',
             resolve : {
-                data: function($route, services) {
-                    return services.getLinks();
-                },
                 topics: function(TopicServices, $route) {
                     return TopicServices.getTopics();
                 }
@@ -21,10 +18,6 @@ angular.module('myApp.timeline', ['ngRoute'])
             templateUrl : 'modules/timeline/timeline.html',
             controller : 'timelineListCtrl',
             resolve : {
-                data: function($route, services) {
-                    var userID = $route.current.params.userID;
-                    return services.getLinksForUser(userID);
-                },
                 topics: function(TopicServices, $route) {
                     var userID = $route.current.params.userID;
                     return TopicServices.getTopicsForUser(userID);
@@ -36,10 +29,6 @@ angular.module('myApp.timeline', ['ngRoute'])
             templateUrl : 'modules/timeline/timeline.html',
             controller : 'timelineListCtrl',
             resolve : {
-                data: function($route, services) {
-                    var topicID = $route.current.params.topicID;
-                    return services.getLinksForTopic(topicID);
-                },
                 topics: function(TopicServices, $route) {
                     var userID = $route.current.params.userID;
                     return TopicServices.getTopicsForUser(userID);
@@ -89,10 +78,9 @@ angular.module('myApp.timeline', ['ngRoute'])
         }
     })
 
-    .controller('timelineListCtrl', function($scope, $http, $routeParams, $filter, $location, data, services, ngTableParams, AuthenticationService, ReadstatusService, UserService, TopicServices, topics, Reddit) {
+    .controller('timelineListCtrl', function($scope, $http, $routeParams, $filter, $location, services, ngTableParams, AuthenticationService, ReadstatusService, UserService, TopicServices, topics, Reddit) {
         $scope.user = AuthenticationService.getCurrentUser();
 
-        $scope.links = data.data;
         $scope.topics = topics.data;
         $scope.readStats = ReadstatusService.getReadstats();
 
@@ -254,7 +242,7 @@ angular.module('myApp.timeline', ['ngRoute'])
 
                 console.log("NextPage()");
 
-                var url = "/timelime/services/links?"
+                var url = "services/links?"
                     + "after=" + this.after
                     + "&topic=" + topicID
                     + "&readStatus=" + readStatID
