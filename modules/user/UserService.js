@@ -11,6 +11,12 @@ angular.module('myApp.User')
                 return $http.get(serviceBase + 'user?id=' + userID);
             }
 
+            obj.addUser = function(user) {
+                return $http.post(serviceBase + 'insertUser', user).then(function(result) {
+                    return result;
+                });
+            }
+
             return obj;
         }
     ])

@@ -2,10 +2,13 @@
     <div class="container">
         <div class="row">
             <h2> User Info </h2>
+
             <div class="col-md-2"> Username: </div>
             <div class="col-md-10"> X</div>
             <div class="col-md-2"> UserID: </div>
             <div class="col-md-10"> X</div>
+        </div>
+        <div class="row" ng-controller="userChangePasswordCtrl">
 
             <h2> Change password </h2>
 
@@ -14,23 +17,46 @@
                 <div class= "form-group" ng-class="{error: passwordForm.oldPassword.$invalid}">
                     <div class="col-md-2"> Old Password: </div>
                     <div class="col-md-10">
-                        <input name="password_old" ng-model="passwordOld" type="text" class="form-control" required="">
+                        <input name="password_old" ng-model="passwordOld1" type="text" class="form-control" required="true">
                     </div>
                 </div>
 
                 <div class= "form-group" ng-class="{error: passwordForm.oldPassword.$invalid}">
                     <div class="col-md-2"> New Password: </div>
                     <div class="col-md-10">
-                        <input name="password_old" ng-model="passwordOld" type="text" class="form-control" required="">
+                        <input name="password_old" ng-model="passwordOld2" type="text" class="form-control" required="true">
                     </div>
                 </div>
 
                 <div class= "form-group" ng-class="{error: passwordForm.oldPassword.$invalid}">
                     <div class="col-md-2"> New Password again: </div>
                     <div class="col-md-10">
-                        <input name="password_old" ng-model="passwordOld" type="text" class="form-control" required="">
+                        <input name="password_old" ng-model="passwordNew" type="text" class="form-control" required="true">
                     </div>
                 </div>
+
+            </form>
+        </div>
+
+        <div class="row" ng-controller="userAddUserCtrl">
+            <h2> Add User </h2>
+            <form role="form" name="addUserForm" class="form-horizontal">
+
+                <div class= "form-group">
+                    <div class="col-md-2"> Username </div>
+                    <div class="col-md-10">
+                        <input name="username" ng-model="user.username" type="text" class="form-control" required="true">
+                    </div>
+                </div>
+
+                <div class= "form-group">
+                    <div class="col-md-2"> Password: </div>
+                    <div class="col-md-10">
+                        <input name="password" ng-model="user.password" type="text" class="form-control" required="true">
+                    </div>
+                </div>
+
+                <input type="submit" ng-click="addUser()" value="Add User" />
 
             </form>
         </div>

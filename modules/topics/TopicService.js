@@ -20,9 +20,7 @@ angular.module('myApp.topics')
      }
 
      obj.insertTopic = function(topic) {
-        return $http.post(serviceBase + 'insertTopic', topic).then(function(results) {
-            return results;
-        });
+        return $http.post(serviceBase + 'insertTopic', topic);
      };
 
      obj.updateTopic = function(id, topic) {

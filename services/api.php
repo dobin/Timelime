@@ -78,30 +78,6 @@ class API extends REST {
 		    $this -> response($this -> json($error), 401);
 		}
 	}
-/*
-	public function fixTags() {
-        $mongoLinks = $this->mongoDB->selectCollection('links');
-        $searchArr = array();
-        $linksCursor = $mongoLinks->find($searchArr);
-
-        foreach($linksCursor as $link) {
-            $newtags = array();
-
-            if (array_key_exists('tags', $link)) {
-
-                foreach($link['tags'] as $tag) {
-                    $newtags[] = $tag['text'];
-
-                }
-                //unlink($link['tags']);
-
-                $link['tags'] = $newtags;
-
-                $mongoLinks->update(array('linkID' => $link['linkID']), $link);
-            }
-        }
-	}*/
-
 
 	private function getAuthenticationHeader() {
 	    $token = "";
@@ -649,7 +625,6 @@ class API extends REST {
 	}
 
 
-
     private function users() {
         if ($this -> get_request_method() != "GET") {
             $this -> response('', 406);
@@ -683,6 +658,36 @@ class API extends REST {
         );
 
         $this->response($this->json($publicUser), 200);
+    }
+
+    private function insertUser() {
+		if ($this -> get_request_method() != "POST") {
+			$this -> response('', 406);
+		}
+        $authUserID = $this->getTokenUSerID();
+        if (is_null($authUserID)) {
+            $this -> response('', 401);
+            return;
+        }
+/*
+        if(! isAdmin($authUserID)) {
+            $this -> response('', 401);
+            return;
+        }
+*/
+
+        $mongoID = new MongoID();
+        $mID = $mongoID->{'$id'};
+
+		$user = json_decode(file_get_contents("php://input"), true);
+        $user['_id'] = $mID;
+        $user['userID'] = $mID;
+        $user['password'] = md5($user['password']);
+
+        $mongoTopics = $this->mongoDB->selectCollection('users');
+        $mongoTopics->insert($user);
+
+    	$this -> response('', 204);
     }
 
 
