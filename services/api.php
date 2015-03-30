@@ -96,12 +96,13 @@ class API extends REST {
 	    $userID = NULL;
 
         $token = $this->getAuthenticationHeader();
+        error_log("Token: " . $token);
 
         try {
     	    $jwtToken = JWT::decode($token, "test");
             $userID = $jwtToken->userID;
         } catch (Exception $e) {
-            //error_log( 'Caught exception: '.  $e->getMessage() . "\n");
+            error_log( 'Caught exception: '.  $e->getMessage() . "\n");
         }
 
         return $userID;
@@ -116,7 +117,7 @@ class API extends REST {
 			$this -> response('', 406);
 		}
 
-        $authUserID = $this->getTokenUSerID();
+        $authUserID = $this->getTokenUserID();
 
 		$userID = NULL;
         if (isset($this->_request['userID'])) {
@@ -166,8 +167,9 @@ class API extends REST {
             $searchArr['topic.topicPermissions'] = '0';
         } else {
             $searchArr['$or'] = array(
-             array( 'topic.topicPermissions' => 0),
-             array( 'user.userID' => $authUserID));
+                array( 'topic.topicPermissions' => 0),
+                array( 'user.userID' => $authUserID)
+            );
         }
 
         // searchfor?
@@ -217,7 +219,7 @@ class API extends REST {
         }
 
         $userID = NULL;
-        $userID = $this->getTokenUSerID();
+        $userID = $this->getTokenUserID();
 
         $linkURL = NULL;
         if (isset($this->_request['linkURL'])) {
@@ -252,7 +254,7 @@ class API extends REST {
         $id = NULL;
         $query = NULL;
 
-        $authUserID = $this->getTokenUSerID();
+        $authUserID = $this->getTokenUserID();
         $linkID = $this -> _request['id'];
 
         $searchArr = array('linkID' => $linkID);
@@ -415,7 +417,7 @@ class API extends REST {
 		if ($this -> get_request_method() != "DELETE") {
 			$this -> response('', 406);
 		}
-        $userID = $this->getTokenUSerID();
+        $userID = $this->getTokenUserID();
         if (is_null($userID)) {
 			$this -> response('', 401);
             return;
@@ -441,7 +443,7 @@ class API extends REST {
 			$this -> response('', 406);
 		}
 
-        $authUserID = $this->getTokenUSerID();
+        $authUserID = $this->getTokenUserID();
         $mongoTopics = $this->mongoDB->selectCollection('topics');
 
         $searchArr = array();
@@ -472,7 +474,7 @@ class API extends REST {
             $this -> response('', 406);
         }
 
-        $authUserID = $this->getTokenUSerID();
+        $authUserID = $this->getTokenUserID();
 
         $userID = $this -> _request['userID'];
         $mongoTopics = $this->mongoDB->selectCollection('topics');
@@ -509,7 +511,7 @@ class API extends REST {
         $query = NULL;
 
         // UserID
-        $authUserID = $this->getTokenUSerID();
+        $authUserID = $this->getTokenUserID();
 
         $topicID = $this->_request['id'];
 
@@ -599,7 +601,7 @@ class API extends REST {
 		if ($this -> get_request_method() != "POST") {
 			$this -> response('', 406);
 		}
-        $authUserID = $this->getTokenUSerID();
+        $authUserID = $this->getTokenUserID();
         if (is_null($authUserID)) {
 			$this -> response('', 401);
             return;
@@ -664,7 +666,7 @@ class API extends REST {
 		if ($this -> get_request_method() != "POST") {
 			$this -> response('', 406);
 		}
-        $authUserID = $this->getTokenUSerID();
+        $authUserID = $this->getTokenUserID();
         if (is_null($authUserID)) {
             $this -> response('', 401);
             return;

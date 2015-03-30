@@ -239,21 +239,15 @@ angular.module('myApp.timeline', ['ngRoute'])
                     readStatID = readStat.selected.id;
                 }
 
-
-                console.log("NextPage()");
-
                 var url = "services/links?"
                     + "after=" + this.after
                     + "&topic=" + topicID
                     + "&readStatus=" + readStatID
                     + "&tags=" + tags
-                    + "&search=" + search
-                    + "&jsonp=JSON_CALLBACK";
+                    + "&search=" + search;
 
-                console.log("URL: " + url);
-
-                $http.jsonp(url).success(function (data) {
-                    var items = data.children;
+                 $http.get(url).success(function (data) {
+                    var items = data;
 
                     var x;
                     for (var i = 0; i < items.length; i++) {

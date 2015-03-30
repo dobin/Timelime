@@ -93,8 +93,10 @@ app.config(function($httpProvider) {
                 if ($rootScope.globals) {
                     config.headers.Authorization = $rootScope.globals.currentUser.token;
                     ///config.headers.Authorization = 'Bearer ' + AuthenticationService.getUserData().token;
+                    //console.log($rootScope.globals.currentUser.token)
                 }
 
+                //console.log("HMM");
                 //if ($localStorage.token) {
                     //config.headers.Authorization = 'Bearer ' + $localStorage.token;
 
