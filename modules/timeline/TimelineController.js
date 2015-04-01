@@ -225,7 +225,7 @@ angular.module('myApp.timeline', ['ngRoute'])
         };
 
         Reddit.prototype = {
-            nextPage: function (topic, readStat, tags, search) {
+            nextPage: function (selectedUser, topic, readStat, tags, search) {
                 if (this.busy) return;
                 this.busy = true;
 
@@ -244,7 +244,8 @@ angular.module('myApp.timeline', ['ngRoute'])
                     + "&topic=" + topicID
                     + "&readStatus=" + readStatID
                     + "&tags=" + tags
-                    + "&search=" + search;
+                    + "&search=" + search
+                    + "&user=" + selectedUser;
 
                  $http.get(url).success(function (data) {
                     var items = data;

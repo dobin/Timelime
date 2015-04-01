@@ -120,8 +120,8 @@ class API extends REST {
         $authUserID = $this->getTokenUserID();
 
 		$userID = NULL;
-        if (isset($this->_request['userID'])) {
-            $userID = $this -> _request['userID'];
+        if (isset($this->_request['user']) && $this->_request['user'] != 'undefined') {
+            $userID = $this -> _request['user'];
         }
 
         $callback = NULL;
@@ -160,16 +160,16 @@ class API extends REST {
         // Search for user?
         if (! is_null($userID)) {
             $searchArr['user.userID'] = $userID;
-        }
-
-        // Only public?
-        if (! isset($authUserID)) {
-            $searchArr['topic.topicPermissions'] = '0';
         } else {
-            $searchArr['$or'] = array(
-                array( 'topic.topicPermissions' => 0),
-                array( 'user.userID' => $authUserID)
-            );
+            // Only public?
+            if (! isset($authUserID)) {
+                $searchArr['topic.topicPermissions'] = '0';
+            } else {
+                $searchArr['$or'] = array(
+                    array( 'topic.topicPermissions' => 0),
+                    array( 'user.userID' => $authUserID)
+                );
+            }
         }
 
         // searchfor?
@@ -185,12 +185,13 @@ class API extends REST {
             }
         }
 
-
         // After?
         if (isset($after) && $after != "") {
             $after = new MongoDate($after);
             $searchArr['dateAdded'] = array( '$lt' => $after);
-         }
+        }
+
+        //error_log(json_encode($searchArr));
 
         $linksCursor = $mongoLinks->find($searchArr);
         $linksCursor->sort(array('dateAdded' => -1));
