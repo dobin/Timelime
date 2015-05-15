@@ -149,6 +149,7 @@ class API extends REST {
             $tags = urldecode($this -> _request['tags']);
         }
 
+
         $mongoLinks = $this->mongoDB->selectCollection('links');
         $searchArr = array();
 
@@ -166,7 +167,7 @@ class API extends REST {
                 $searchArr['topic.topicPermissions'] = '0';
             } else {
                 $searchArr['$or'] = array(
-                    array( 'topic.topicPermissions' => 0),
+                    array( 'topic.topicPermissions' => '0'),
                     array( 'user.userID' => $authUserID)
                 );
             }
@@ -190,8 +191,6 @@ class API extends REST {
             $after = new MongoDate($after);
             $searchArr['dateAdded'] = array( '$lt' => $after);
         }
-
-        //error_log(json_encode($searchArr));
 
         $linksCursor = $mongoLinks->find($searchArr);
         $linksCursor->sort(array('dateAdded' => -1));
@@ -263,7 +262,7 @@ class API extends REST {
             $searchArr['topic.topicPermissions'] = '0';
         } else {
             $searchArr['$or'] = array(
-             array( 'topic.topicPermissions' => 0),
+             array( 'topic.topicPermissions' => '0'),
              array( 'user.userID' => $authUserID));
         }
 
@@ -452,7 +451,7 @@ class API extends REST {
             $searchArr['topicPermissions'] = '0';
         } else {
             $searchArr['$or'] = array(
-             array( 'topicPermissions' => 0),
+             array( 'topicPermissions' => '0'),
              array( 'userID' => $authUserID));
         }
 
@@ -480,13 +479,21 @@ class API extends REST {
         $userID = $this -> _request['userID'];
         $mongoTopics = $this->mongoDB->selectCollection('topics');
 
+        // User we search topics
         $searchArr = array('userID' => $userID);
         if (! isset($authUserID)) {
+            // When not logged in, just search public
             $searchArr['topicPermissions'] = '0';
         } else {
-            $searchArr['$or'] = array(
-             array( 'topicPermissions' => 0),
-             array( 'userID' => $authUserID));
+            if ($authUserID == $userID) {
+                // When logged in, and same user
+                // Do nothing
+            } else {
+                // When not same user
+                $searchArr['$or'] = array(
+                    array( 'topicPermissions' => '0'),
+                    array( 'userID' => $authUserID));
+            }
         }
 
         $topicsCursor = $mongoTopics->find($searchArr);
@@ -522,7 +529,7 @@ class API extends REST {
             $searchArr['topicPermissions'] = '0';
         } else {
             $searchArr['$or'] = array(
-             array( 'topicPermissions' => 0),
+             array( 'topicPermissions' => '0'),
              array( 'userID' => $authUserID));
         }
 

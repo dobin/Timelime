@@ -92,7 +92,13 @@ angular.module('myApp.timeline', ['ngRoute'])
             search: ''
         };
 
-        $scope.reddit = new Reddit();
+        $scope.items = [];
+        $scope.busy = false;
+        $scope.after = '';
+
+        $scope.dateFormat = 'dd.MM.yyyy';
+        //$scope.reddit = new Reddit();
+        $scope.reddit = Reddit;
 
         // Readstatus
         var initialSearchStatus = $location.search().readStatus;
@@ -104,10 +110,8 @@ angular.module('myApp.timeline', ['ngRoute'])
         // tags
         $scope.filter.tags = $location.search().tags;
 
-
         // Check if its ours
         var selectedUserID = $routeParams.userID;
-        $scope.dateFormat = 'dd.MM.yyyy';
         if (selectedUserID) {
             UserService.getUserInfo(selectedUserID).then(function (user) {
                 $scope.selectedUser = user.data;
@@ -118,9 +122,10 @@ angular.module('myApp.timeline', ['ngRoute'])
                 $scope.dateFormat = 'HH:mm dd.MM.yyyy';
             } else {
                 $scope.isMy = false;
-
             }
         }
+        $scope.selectedUserID = selectedUserID;
+        console.log("SelectedUserID: " + selectedUserID);
 
         // Check if a topic is selected
         var selectedTopicID = $routeParams.topicID;
@@ -173,7 +178,7 @@ angular.module('myApp.timeline', ['ngRoute'])
             //console.log($scope.topic);
             //console.log($scope.readStat.selected);
 
-            //$scope.reddit.sett("aa");
+            //$scope.reddit.sett();
             //$scope.reddit.search.topic = $scope.topic.selected.topicID;
             //$scope.reddit.search.readstatus = $scope.readStat.selected.id;
             //$scope.reddit.search.tags = $scope.tags;
@@ -208,26 +213,34 @@ angular.module('myApp.timeline', ['ngRoute'])
             $scope.topic.selected = undefined;
             $scope.reloadTable();
         }
+
+        $scope.infiScroll = function() {
+            Reddit.nextPage($scope.selectedUserID, $scope.topic, $scope.readStat, $scope.filter.tags, $scope.filter.search, $scope.after).success(function (data) {
+                    var items = data;
+
+                    var x;
+                    for (var i = 0; i < items.length; i++) {
+                        x = items[i].dateAdded.sec;
+                        services.processLink(items[i]);
+                        $scope.items.push(items[i]);
+                    }
+
+
+                $scope.after = x;
+                $scope.busy = false;
+            });
+        }
     })
 
 .factory('Reddit', function($http, services) {
-        var Reddit = function() {
-            this.items = [];
-            this.busy = false;
-            this.after = '';
-            this.shit = 'S1';
+        var Reddit = {};
 
-            this.search = {
-                topic: '',
-                readStatus: '',
-                tags: []
-            };
-        };
+        Reddit.nextPage = function (selectedUser, topic, readStat, tags, search, after) {
+                //if (this.busy) return;
+                //this.busy = true;
 
-        Reddit.prototype = {
-            nextPage: function (selectedUser, topic, readStat, tags, search) {
-                if (this.busy) return;
-                this.busy = true;
+                console.log("User: " + selectedUser);
+                console.log("User: " + this.shit);
 
                 var topicID = '';
                 var readStatID = '';
@@ -240,27 +253,15 @@ angular.module('myApp.timeline', ['ngRoute'])
                 }
 
                 var url = "services/links?"
-                    + "after=" + this.after
+                    + "after=" + after
                     + "&topic=" + topicID
                     + "&readStatus=" + readStatID
                     + "&tags=" + tags
                     + "&search=" + search
                     + "&user=" + selectedUser;
 
-                 $http.get(url).success(function (data) {
-                    var items = data;
-
-                    var x;
-                    for (var i = 0; i < items.length; i++) {
-                        x = items[i].dateAdded.sec;
-                        services.processLink(items[i]);
-                        this.items.push(items[i]);
-                    }
-                    this.after = x;
-                    this.busy = false;
-                }.bind(this));
-            }
-        };
+                 return $http.get(url);
+            };
 
         return Reddit;
 });

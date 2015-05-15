@@ -63,15 +63,15 @@
     </div>
 
 
-    <div infinite-scroll='reddit.nextPage(selectedUser.userID, topic, readStat, filter.tags, filter.search)' infinite-scroll-disabled='reddit.busy' infinite-scroll-distance='0'>
+    <div infinite-scroll='infiScroll()' infinite-scroll-disabled='$scope.busy' infinite-scroll-distance='0'>
         <table class="table timelinetable">
-        <tr ng-repeat='link in reddit.items'>
+        <tr ng-repeat='link in items'>
             <td class="col-md-2" style="text-align:right" data-title="'DateAdded'" sortable="'dateAdded'" filter="{ 'Date': 'text' }">
                     <span class="timelineTitleBig">
                         {{link.dateAdded | date :dateFormat}}
                     </span><br>
 
-                {{link.topic.topicName}}
+                {{link.topic.topicName}}, {{link.user.userName}}
 
                 <br>
                 <a ng-repeat="tag in link.tags">{{tag.text}}&nbsp;</a>
