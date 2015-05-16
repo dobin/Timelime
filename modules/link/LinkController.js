@@ -49,10 +49,7 @@ angular.module('myApp.links', ['ngRoute'])
                     };
                     return a;
                 },
-                topics: function(TopicServices, $route) {
-                    return TopicServices.getTopics();
-                },
-                formats: function(services, $route) {
+            formats: function(services, $route) {
                     return services.getFormats();
                 }
             }
@@ -177,7 +174,7 @@ angular.module('myApp.links', ['ngRoute'])
         }
     })
 
-    .controller('linkAddCtrl', function($scope, $rootScope, $location, $routeParams, services, link, topics, formats, AuthenticationService, TopicServices, ReadstatusService) {
+    .controller('linkAddCtrl', function($scope, $rootScope, $location, $routeParams, services, link, formats, AuthenticationService, TopicServices, ReadstatusService) {
         $rootScope.title = 'Add Link';
         $scope.buttonText = 'Add New Link';
 
@@ -186,13 +183,11 @@ angular.module('myApp.links', ['ngRoute'])
         var original = link;
         $scope.link = angular.copy(original);
 
-        $scope.topics = topics.data;
         $scope.formats = formats;
 
         $scope.link.readStatus = '0';
         $scope.link.readStatusInitial = '0';
-        $scope.link.user = {
-        };
+        $scope.link.user = { };
         $scope.link.format = "website";
         $scope.link.topic = {};
 
@@ -203,6 +198,16 @@ angular.module('myApp.links', ['ngRoute'])
         if ($routeParams.title) {
             $scope.link.linkName = decodeURIComponent($routeParams.title);
         }
+
+        var userID = AuthenticationService.getCurrentUserID();
+        TopicServices.getTopicsForUser(userID).then(function(data) {
+            $scope.topics = data.data;
+        });
+
+//        topics: function(TopicServices, $route) {
+//            return TopicServices.getTopics();
+//        },
+        //$scope.topics = topics.data;
 
         $scope.checkIfLinkExists = function(link) {
             var data = services.checkIfLinkExists(link);
